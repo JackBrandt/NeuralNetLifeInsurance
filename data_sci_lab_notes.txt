@@ -1,0 +1,38 @@
+DataSci Lab Notes
+Jack's notes from first few days of class, IGNORE unless you have stuff to add
+
+
+
+
+
+Products to become familiar with:
+•	Cloud Function
+•	Lambda
+•	Node
+•	API Gateway
+•	GCP
+•	Amplify
+•	Coud Run
+•	Cloudflare
+•	Chalice
+•	Docker
+Project Ideas
+1.	Life insurance policy cost calculator
+a.	Answer some questions, and model predicts how much that policy should cost
+2.	Car insurance policy cost calculator
+a.	Answer some questions, and model predicts how much that policy should cost
+3.	Home insurance policy cost calculator
+a.	Answer some questions, and model predicts how much that policy should cost
+-
+Mortality/life insurance predictor
+   -Take in a bunch of attributes and      predict likelihood of surving to a ceratin age, then calculate cost for life insurance policy
+-Car accident insurance predictor
+    -Take in a bunch of attributes and predict likelihood of car crash within a certain period, the calculate cost for car insurance
+-bankruptcy predictor
+    -Predict likelihood company will go bankrupt before bond expires and adjust bond priciing accordingly
+
+Streamlet – Easy web/app
+Amplify – more complicated
+Node – good medium option, what we should aim for
+
+
