@@ -1,0 +1,17 @@
+Project Proposal: Life Insurance Risk Prediction Model
+
+Project Objective:
+Develop a machine learning model to estimate the probability of an individual passing away in a given year of life based on relevant health, medical history, and lifestyle factors. Utilize these probability estimates to inform life insurance pricing strategies.
+
+Scope and Approach:
+
+Collect and preprocess data from reputable sources, including demographic, medical, and lifestyle variables.
+Explore various machine learning techniques, such as logistic regression, decision trees, and ensemble methods, to model mortality risk.
+Validate model performance using appropriate evaluation metrics, such as accuracy, precision-recall, and calibration plots.
+Apply actuarial principles to translate risk predictions into competitive life insurance pricing strategies.
+
+Team Members:
+Jack, Tony, Jiaxin
+
+Link to google doc
+https://docs.google.com/document/d/1G-jWtdGZUr_KSO2UkwwdWGIreHNC0C507LdjUxj2Ja8/edit?tab=t.0#heading=h.1vfb9oqgc06t
