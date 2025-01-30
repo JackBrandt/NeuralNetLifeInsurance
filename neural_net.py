@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
-from utils import get_life_inputs
+from utils import get_life_inputs, convert_to_binary
 
 def load_model(model_class, filepath="model.pth"):
     """Loads the saved model and returns an instance of it."""
@@ -101,10 +101,15 @@ def print_life_data(cols):
     # Convert categorical columns to numerical values
     print(inputs)
     for i,col in enumerate(inputs.select_dtypes(include=['object']).columns):
-        le=label_encoders[col]
-        inputs[col] = le.fit_transform(inputs[col])  # Convert categories to numbers
+        inputs[col] = inputs[col].apply(lambda x: convert_to_binary(x))
     print(inputs)
-    print(model(inputs))
+    inputs=scaler.transform(inputs)
+    tensor_input=torch.tensor(inputs, dtype=torch.float32)
+    model.eval()
+    # Get model predictions
+    with torch.no_grad():  # No need for gradient tracking
+        outputs = model(tensor_input)
+    print(outputs)
 
 if __name__ == "__main__":
     from utils import load_prep_data
@@ -112,7 +117,7 @@ if __name__ == "__main__":
     model = NeuralNet()
 
     # Split into train and test sets
-    X_train, X_test, y_train, y_test, scaler, label_encoders, cols = load_prep_data('data.csv')
+    X_train, X_test, y_train, y_test, scaler, cols = load_prep_data('data.csv')
     #print(scaler.get_params)
     #print(label_encoders)
     # Create PyTorch DataLoader

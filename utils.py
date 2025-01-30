@@ -3,6 +3,10 @@ import torch
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 
+def convert_to_binary(value):
+    """Converts 'm' or 'y' to 1, otherwise returns 0."""
+    return 1 if str(value).lower() in ["m", "y"] else 0
+
 def load_prep_data(file_path):
     '''Loads and preps data...
     Args:
@@ -26,11 +30,8 @@ def load_prep_data(file_path):
     X = df.iloc[:, 1:].copy()  # Everything else is features
     input_cols=X.columns
     # Convert categorical columns to numerical values
-    label_encoders = {}  # Store encoders for inverse transform later if needed
     for col in X.select_dtypes(include=['object']).columns:
-        le = LabelEncoder()
-        X[col] = le.fit_transform(X[col])  # Convert categories to numbers
-        label_encoders[col] = le  # Save encoder for future use
+        X[col] = X[col].apply(lambda x: convert_to_binary(x))
 
     # Normalize numerical features
     scaler = StandardScaler()
@@ -43,7 +44,7 @@ def load_prep_data(file_path):
 
     # Split into train and test sets
     X_train, X_test, y_train, y_test =  train_test_split(X_tensor, y_tensor, test_size=0.2, random_state=42)
-    return X_train, X_test, y_train, y_test, scaler, label_encoders, input_cols
+    return X_train, X_test, y_train, y_test, scaler, input_cols
 
 def get_life_inputs():
     weight = float(input("Weight(lbs): "))
