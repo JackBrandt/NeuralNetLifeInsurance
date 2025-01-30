@@ -24,7 +24,7 @@ def load_prep_data(file_path):
     #print(y_vals[0])
     #print(y[0][72])
     X = df.iloc[:, 1:].copy()  # Everything else is features
-
+    input_cols=X.columns
     # Convert categorical columns to numerical values
     label_encoders = {}  # Store encoders for inverse transform later if needed
     for col in X.select_dtypes(include=['object']).columns:
@@ -43,27 +43,27 @@ def load_prep_data(file_path):
 
     # Split into train and test sets
     X_train, X_test, y_train, y_test =  train_test_split(X_tensor, y_tensor, test_size=0.2, random_state=42)
-    return X_train, X_test, y_train, y_test, scaler, label_encoders
+    return X_train, X_test, y_train, y_test, scaler, label_encoders, input_cols
 
 def get_life_inputs():
-    weight = input("Weight(lbs): ")
+    weight = float(input("Weight(lbs): "))
     sex = input("Sex(m/f): ")
-    height = input("Height(in): ")
-    sys_bp = input("Sys_BP: ")
+    height = float(input("Height(in): "))
+    sys_bp = float(input("Sys_BP: "))
     smoker = input("Smoker (y/n): ")
     nic_other = input("Nicotine (other than smoking) use (y/n): ")
-    num_meds = input("Number of medications: ")
-    occup_danger = input("Occupational danger (1/2/3): ")
-    ls_danger = input("Lifestyle danger (1/2/3): ")
+    num_meds = float(input("Number of medications: "))
+    occup_danger = float(input("Occupational danger (1/2/3): "))
+    ls_danger = float(input("Lifestyle danger (1/2/3): "))
     cannabis = input("Cannabis use (y/n): ")
     opioids = input("Opioid use (y/n): ")
     other_drugs = input("Other drug use (y/n): ")
-    drinks_aweek = input("Drinks per week: ")
+    drinks_aweek = float(input("Drinks per week: "))
     addiction = input("Addiction history (y/n): ")
-    major_surgery_num = input("Number of major surgeries: ")
+    major_surgery_num = float(input("Number of major surgeries: "))
     diabetes = input("Diabetes (y/n): ")
     hds = input("Heart disease history (y/n): ")
-    cholesterol = input("Cholesterol: ")
+    cholesterol = float(input("Cholesterol: "))
     asthma = input("Asthma (y/n): ")
     immune_defic = input("Immune deficiency (y/n): ")
     family_cancer = input("Family history of cancer (y/n): ")

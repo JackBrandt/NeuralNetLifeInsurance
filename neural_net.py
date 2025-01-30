@@ -1,3 +1,4 @@
+import pandas as pd
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -93,11 +94,16 @@ class NeuralNet(nn.Module):
                 model.neural_net_eval()
             model.save_model()
 
-def print_life_data():
+def print_life_data(cols):
     # Get inputs
-    inputs=get_life_inputs()
+    inputs=pd.DataFrame([get_life_inputs()],columns=cols)
     # Prep Inputs
-    
+    # Convert categorical columns to numerical values
+    print(inputs)
+    for i,col in enumerate(inputs.select_dtypes(include=['object']).columns):
+        le=label_encoders[col]
+        inputs[col] = le.fit_transform(inputs[col])  # Convert categories to numbers
+    print(inputs)
     print(model(inputs))
 
 if __name__ == "__main__":
@@ -106,15 +112,16 @@ if __name__ == "__main__":
     model = NeuralNet()
 
     # Split into train and test sets
-    X_train, X_test, y_train, y_test, scaler, label_encoders = load_prep_data('data.csv')
-    print(scaler.get_params)
-    print(label_encoders)
+    X_train, X_test, y_train, y_test, scaler, label_encoders, cols = load_prep_data('data.csv')
+    #print(scaler.get_params)
+    #print(label_encoders)
     # Create PyTorch DataLoader
     batch_size = 32
     train_dataset = TensorDataset(X_train, y_train)
     test_dataset = TensorDataset(X_test, y_test)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
-    model.train_eval_save(1,1,True)
+    #model.train_eval_save(1,1,True)
     model=load_model(NeuralNet)
-    model.neural_net_eval()
+    #model.neural_net_eval()
+    print_life_data(cols)
