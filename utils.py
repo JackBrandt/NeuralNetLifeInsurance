@@ -1,4 +1,6 @@
 import pandas as pd
+import torch
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 
 def load_prep_data(file_path):
@@ -34,4 +36,10 @@ def load_prep_data(file_path):
     scaler = StandardScaler()
     X = scaler.fit_transform(X)  # Standardize input features
 
-    return X,y
+    # Convert to PyTorch tensors
+    #print(y)
+    X_tensor = torch.tensor(X, dtype=torch.float32)
+    y_tensor = torch.tensor(y, dtype=torch.float32)  # Use long for classification
+
+    # Split into train and test sets
+    return train_test_split(X_tensor, y_tensor, test_size=0.2, random_state=42)

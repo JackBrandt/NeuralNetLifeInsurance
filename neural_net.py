@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
-from sklearn.model_selection import train_test_split
 
 def load_model(model_class, filepath="model.pth"):
     """Loads the saved model and returns an instance of it."""
@@ -20,6 +19,8 @@ class NeuralNet(nn.Module):
         self.fc2 = nn.Linear(10, 145) # Output layer with 95 neurons
         self.relu = nn.ReLU()
         self.softmax = nn.Softmax(dim=1)  # Apply softmax for multi-class classification
+        self.optimizer = optim.Adam(self.parameters(), lr=0.001)
+        self.criterion = nn.CrossEntropyLoss()  # Use for classification
 
     def forward(self, x):
         x = self.relu(self.fc1(x))
@@ -44,11 +45,11 @@ class NeuralNet(nn.Module):
             batch_counter=1
             for inputs, labels in train_loader:
                 #print(batch_counter)
-                optimizer.zero_grad()  # Zero the gradients
+                self.optimizer.zero_grad()  # Zero the gradients
                 outputs = self(inputs)  # Forward pass
-                loss = criterion(outputs, labels)  # Compute loss
+                loss = self.criterion(outputs, labels)  # Compute loss
                 loss.backward()  # Backpropagation
-                optimizer.step()  # Update weights
+                self.optimizer.step()  # Update weights
 
                 running_loss += loss.item()
                 batch_counter+=1
@@ -120,18 +121,9 @@ if __name__ == "__main__":
     from utils import load_prep_data
     # Example usage
     model = NeuralNet()
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
-    criterion = nn.CrossEntropyLoss()  # Use for classification
-
-    X,y = load_prep_data('data.csv')
-
-    # Convert to PyTorch tensors
-    #print(y)
-    X_tensor = torch.tensor(X, dtype=torch.float32)
-    y_tensor = torch.tensor(y, dtype=torch.float32)  # Use long for classification
 
     # Split into train and test sets
-    X_train, X_test, y_train, y_test = train_test_split(X_tensor, y_tensor, test_size=0.2, random_state=42)
+    X_train, X_test, y_train, y_test = load_prep_data('data.csv')
 
     # Create PyTorch DataLoader
     batch_size = 32
