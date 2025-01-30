@@ -1,0 +1,7 @@
+Git Branch
+    1. Create a branch: git branch <name>
+    2. Switch between branches: git checkout <name>
+    3. Make sure you are pushing and pulling from the right branch
+        Push: git push -u <remote_branch> <local_branch>
+            Note that in our case, our remove_branch and local_branch are the same
+                E.g., git push -u tony_branch tony_brach
