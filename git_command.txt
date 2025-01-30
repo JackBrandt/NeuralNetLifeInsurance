@@ -9,10 +9,10 @@ On the high level, there are two concepts: your local branch and the remote bran
             Note that in our case, our remove_branch and local_branch are the same
                 E.g., git push -u origin tony_brach
     4. To merge two branches. Note that in reality, you should create a Pull Request on GitHub 
-        first for everyone to review and approve.
+        first for everyone to review and approve before merging.
         * Push to your branch
         * git checkout main 
         * git pull origin main - this is to make sure your main is up to date
-        * git checkout <your branch>
-        * git merge <current_branch> main - this will complete the merge step
+        * git merge <current_branch> - this will complete the merge step
+        * git checkout main
         * git push -u <current_branch> main - push the newest changes to main
