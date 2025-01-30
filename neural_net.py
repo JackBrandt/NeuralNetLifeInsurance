@@ -113,19 +113,19 @@ def print_life_data(cols):
 
 if __name__ == "__main__":
     from utils import load_prep_data
-    # Example usage
     model = NeuralNet()
 
     # Split into train and test sets
+    # At the very least scaler and cols should be attributes of Neural Net so that they can be pickled
     X_train, X_test, y_train, y_test, scaler, cols = load_prep_data('data.csv')
-    #print(scaler.get_params)
-    #print(label_encoders)
-    # Create PyTorch DataLoader
+
+    # This chuck could either be merged into load_prep_data or into NeuralNet class function
     batch_size = 32
     train_dataset = TensorDataset(X_train, y_train)
     test_dataset = TensorDataset(X_test, y_test)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+
     #model.train_eval_save(1,1,True)
     model=load_model(NeuralNet)
     #model.neural_net_eval()
