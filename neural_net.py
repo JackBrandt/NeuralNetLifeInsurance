@@ -1,45 +1,15 @@
-import pandas as pd
+import pickle
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder, StandardScaler
 
-def load_prep_data(file_path):
-    '''Loads and preps data...
-    Args:
-        file_path (str):...
-    Returns:
-        X (array of arrays)
-        y (array of arrays)
-    '''
-    # Load CSV file
-    df = pd.read_csv(file_path, header=0)
 
-    # Extract target (y) and features (X)
-    empty=[0]*145
-    y_vals = df.iloc[:, 0].values  # First column is target
-    y_vals=[value-23 for value in y_vals]
-    y=[empty.copy() for _ in y_vals]
-    for i,y_val in enumerate(y_vals):
-        y[i][y_val]=1
-    #print(y_vals[0])
-    #print(y[0][72])
-    X = df.iloc[:, 1:].copy()  # Everything else is features
-
-    # Convert categorical columns to numerical values
-    label_encoders = {}  # Store encoders for inverse transform later if needed
-    for col in X.select_dtypes(include=['object']).columns:
-        le = LabelEncoder()
-        X[col] = le.fit_transform(X[col])  # Convert categories to numbers
-        label_encoders[col] = le  # Save encoder for future use
-
-    # Normalize numerical features
-    scaler = StandardScaler()
-    X = scaler.fit_transform(X)  # Standardize input features
-
-    return X,y
+def save_model(model, filepath="model.pth"):
+    """Saves the neural network model."""
+    torch.save(model.state_dict(), filepath)  # Save model parameters
+    print(f"Model saved to {filepath}")
 
 class NeuralNet(nn.Module):
     def __init__(self):
@@ -55,28 +25,6 @@ class NeuralNet(nn.Module):
         #x = self.relu(self.fc2(x))
         x = self.fc2(x)
         return self.softmax(x)  # Use softmax if classification
-
-# Example usage
-model = NeuralNet()
-optimizer = optim.Adam(model.parameters(), lr=0.001)
-criterion = nn.CrossEntropyLoss()  # Use for classification
-
-X,y = load_prep_data('data.csv')
-
-# Convert to PyTorch tensors
-#print(y)
-X_tensor = torch.tensor(X, dtype=torch.float32)
-y_tensor = torch.tensor(y, dtype=torch.float32)  # Use long for classification
-
-# Split into train and test sets
-X_train, X_test, y_train, y_test = train_test_split(X_tensor, y_tensor, test_size=0.2, random_state=42)
-
-# Create PyTorch DataLoader
-batch_size = 32
-train_dataset = TensorDataset(X_train, y_train)
-test_dataset = TensorDataset(X_test, y_test)
-train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
 
 # Training loop
@@ -126,6 +74,7 @@ def neural_net_eval():
     mean_mean_absolute_error = sum_of_mean_absolute_errors/len(outputs)
     print(f"Test Mean Mean Absolute Error: {mean_mean_absolute_error}")
 
+
 def print_life_data():
     weight = input("Weight(lbs): ")
     sex = input("Sex(m/f): ")
@@ -158,12 +107,33 @@ def print_life_data():
         major_surgery_num, diabetes, hds, cholesterol, asthma, immune_defic,
         family_cancer, family_heart_disease, family_cholesterol
     ]
-    inputs=prep_inputs(inputs)
+    #inputs=prep_inputs([inputs])
 
     print(model(inputs))
 
 if __name__ == "__main__":
+    from utils import load_prep_data
+    # Example usage
+    model = NeuralNet()
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    criterion = nn.CrossEntropyLoss()  # Use for classification
+
+    X,y = load_prep_data('data.csv')
+
+    # Convert to PyTorch tensors
+    #print(y)
+    X_tensor = torch.tensor(X, dtype=torch.float32)
+    y_tensor = torch.tensor(y, dtype=torch.float32)  # Use long for classification
+
+    # Split into train and test sets
+    X_train, X_test, y_train, y_test = train_test_split(X_tensor, y_tensor, test_size=0.2, random_state=42)
+
+    # Create PyTorch DataLoader
+    batch_size = 32
+    train_dataset = TensorDataset(X_train, y_train)
+    test_dataset = TensorDataset(X_test, y_test)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
     for _ in range(1):
         neural_net_train(epoch=1)#Change epoch to do more training between evals
         neural_net_eval()
-    print_life_data()
