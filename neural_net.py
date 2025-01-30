@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
+from utils import get_life_inputs
 
 def load_model(model_class, filepath="model.pth"):
     """Loads the saved model and returns an instance of it."""
@@ -80,41 +81,23 @@ class NeuralNet(nn.Module):
         mean_mean_absolute_error = sum_of_mean_absolute_errors/len(outputs)
         print(f"Test Mean Mean Absolute Error: {mean_mean_absolute_error}")
 
+    def train_eval_save(self, reps, epoch, eval_always=True):
+        '''Trains, evaluates, and saves model:
+        Args:
+            reps: Number loops of training/eval
+            epoch: Number of trainings between evals
+            eval_always: Defaults to true, if false doesn't evaluate until final train'''
+        for i in range(reps):
+            model.neural_net_train(epoch=epoch)#Change epoch to do more training between evals
+            if eval_always or i== reps:
+                model.neural_net_eval()
+            model.save_model()
 
 def print_life_data():
-    weight = input("Weight(lbs): ")
-    sex = input("Sex(m/f): ")
-    height = input("Height(in): ")
-    sys_bp = input("Sys_BP: ")
-    smoker = input("Smoker (y/n): ")
-    nic_other = input("Nicotine (other than smoking) use (y/n): ")
-    num_meds = input("Number of medications: ")
-    occup_danger = input("Occupational danger (1/2/3): ")
-    ls_danger = input("Lifestyle danger (1/2/3): ")
-    cannabis = input("Cannabis use (y/n): ")
-    opioids = input("Opioid use (y/n): ")
-    other_drugs = input("Other drug use (y/n): ")
-    drinks_aweek = input("Drinks per week: ")
-    addiction = input("Addiction history (y/n): ")
-    major_surgery_num = input("Number of major surgeries: ")
-    diabetes = input("Diabetes (y/n): ")
-    hds = input("Heart disease history (y/n): ")
-    cholesterol = input("Cholesterol: ")
-    asthma = input("Asthma (y/n): ")
-    immune_defic = input("Immune deficiency (y/n): ")
-    family_cancer = input("Family history of cancer (y/n): ")
-    family_heart_disease = input("Family history of heart disease (y/n): ")
-    family_cholesterol = input("Family history of high cholesterol (y/n): ")
-
-    # Store all inputs in an array then prep
-    inputs = [
-        weight, sex, height, sys_bp, smoker, nic_other, num_meds, occup_danger,
-        ls_danger, cannabis, opioids, other_drugs, drinks_aweek, addiction,
-        major_surgery_num, diabetes, hds, cholesterol, asthma, immune_defic,
-        family_cancer, family_heart_disease, family_cholesterol
-    ]
-    #inputs=prep_inputs([inputs])
-
+    # Get inputs
+    inputs=get_life_inputs()
+    # Prep Inputs
+    
     print(model(inputs))
 
 if __name__ == "__main__":
@@ -123,17 +106,15 @@ if __name__ == "__main__":
     model = NeuralNet()
 
     # Split into train and test sets
-    X_train, X_test, y_train, y_test = load_prep_data('data.csv')
-
+    X_train, X_test, y_train, y_test, scaler, label_encoders = load_prep_data('data.csv')
+    print(scaler.get_params)
+    print(label_encoders)
     # Create PyTorch DataLoader
     batch_size = 32
     train_dataset = TensorDataset(X_train, y_train)
     test_dataset = TensorDataset(X_test, y_test)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
-    for _ in range(1):
-        model.neural_net_train(epoch=1)#Change epoch to do more training between evals
-        model.neural_net_eval()
-        model.save_model()
-        model=load_model(NeuralNet)
-        model.neural_net_eval()
+    model.train_eval_save(1,1,True)
+    model=load_model(NeuralNet)
+    model.neural_net_eval()

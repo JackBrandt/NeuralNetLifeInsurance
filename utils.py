@@ -42,4 +42,39 @@ def load_prep_data(file_path):
     y_tensor = torch.tensor(y, dtype=torch.float32)  # Use long for classification
 
     # Split into train and test sets
-    return train_test_split(X_tensor, y_tensor, test_size=0.2, random_state=42)
+    X_train, X_test, y_train, y_test =  train_test_split(X_tensor, y_tensor, test_size=0.2, random_state=42)
+    return X_train, X_test, y_train, y_test, scaler, label_encoders
+
+def get_life_inputs():
+    weight = input("Weight(lbs): ")
+    sex = input("Sex(m/f): ")
+    height = input("Height(in): ")
+    sys_bp = input("Sys_BP: ")
+    smoker = input("Smoker (y/n): ")
+    nic_other = input("Nicotine (other than smoking) use (y/n): ")
+    num_meds = input("Number of medications: ")
+    occup_danger = input("Occupational danger (1/2/3): ")
+    ls_danger = input("Lifestyle danger (1/2/3): ")
+    cannabis = input("Cannabis use (y/n): ")
+    opioids = input("Opioid use (y/n): ")
+    other_drugs = input("Other drug use (y/n): ")
+    drinks_aweek = input("Drinks per week: ")
+    addiction = input("Addiction history (y/n): ")
+    major_surgery_num = input("Number of major surgeries: ")
+    diabetes = input("Diabetes (y/n): ")
+    hds = input("Heart disease history (y/n): ")
+    cholesterol = input("Cholesterol: ")
+    asthma = input("Asthma (y/n): ")
+    immune_defic = input("Immune deficiency (y/n): ")
+    family_cancer = input("Family history of cancer (y/n): ")
+    family_heart_disease = input("Family history of heart disease (y/n): ")
+    family_cholesterol = input("Family history of high cholesterol (y/n): ")
+
+    # Store all inputs in an array then prep
+    inputs = [
+        weight, sex, height, sys_bp, smoker, nic_other, num_meds, occup_danger,
+        ls_danger, cannabis, opioids, other_drugs, drinks_aweek, addiction,
+        major_surgery_num, diabetes, hds, cholesterol, asthma, immune_defic,
+        family_cancer, family_heart_disease, family_cholesterol
+    ]
+    return inputs
