@@ -3,12 +3,14 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
 from utils import get_life_inputs, convert_to_binary
 
 def load_model(model_class, filepath="model.pth"):
     """Loads the saved model and returns an instance of it."""
-    model = model_class()  # Create a new instance of the model
-    model.load_state_dict(torch.load(filepath))  # Load saved parameters
+    model = torch.load('model.pth', weights_only=False)
     model.eval()  # Set model to evaluation mode
     print(f"Model loaded from {filepath}")
     return model
@@ -23,6 +25,9 @@ class NeuralNet(nn.Module):
         self.softmax = nn.Softmax(dim=1)  # Apply softmax for multi-class classification
         self.optimizer = optim.Adam(self.parameters(), lr=0.001)
         self.criterion = nn.CrossEntropyLoss()  # Use for classification
+        self.batch_size = 32
+        self.scaler = StandardScaler()
+        self.cols = []
 
     def forward(self, x):
         x = self.relu(self.fc1(x))
@@ -32,11 +37,11 @@ class NeuralNet(nn.Module):
 
     def save_model(self, filepath="model.pth"):
         """Saves the neural network model."""
-        torch.save(self.state_dict(), filepath)  # Save model parameters
+        torch.save(self, filepath)  # Save model parameters
         print(f"Model saved to {filepath}")
 
     # Training loop
-    def neural_net_train(self, epoch=1):
+    def neural_net_train(self,train_loader, epoch=1):
         '''Trains the nn
         Args:
             epoch (int): number of times to run through the data'''
@@ -52,14 +57,13 @@ class NeuralNet(nn.Module):
                 loss = self.criterion(outputs, labels)  # Compute loss
                 loss.backward()  # Backpropagation
                 self.optimizer.step()  # Update weights
-
                 running_loss += loss.item()
                 batch_counter+=1
             print(f"Epoch {epoch+1}/{num_epochs}, Loss: {running_loss/len(train_loader):.4f}")
         print("Training complete!")
 
     # Evaluation
-    def neural_net_eval(self):
+    def neural_net_eval(self,test_loader):
         self.eval()  # Set to evaluation mode
         sum_of_mean_absolute_errors=0
         with torch.no_grad():
@@ -88,45 +92,43 @@ class NeuralNet(nn.Module):
             reps: Number loops of training/eval
             epoch: Number of trainings between evals
             eval_always: Defaults to true, if false doesn't evaluate until final train'''
+        X_train, X_test, y_train, y_test, self.scaler, self.cols = load_prep_data('data.csv')
+        train_dataset = TensorDataset(X_train, y_train)
+        test_dataset = TensorDataset(X_test, y_test)
+        train_loader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True)
+        test_loader = DataLoader(test_dataset, batch_size=self.batch_size, shuffle=False)
         for i in range(reps):
-            model.neural_net_train(epoch=epoch)#Change epoch to do more training between evals
+            self.neural_net_train(train_loader,epoch)#Change epoch to do more training between evals
             if eval_always or i== reps:
-                model.neural_net_eval()
-            model.save_model()
+                self.neural_net_eval(test_loader)
+            self.save_model()
+        return test_loader # For testing loading
 
-def print_life_data(cols):
-    # Get inputs
-    inputs=pd.DataFrame([get_life_inputs()],columns=cols)
-    # Prep Inputs
-    # Convert categorical columns to numerical values
-    print(inputs)
-    for i,col in enumerate(inputs.select_dtypes(include=['object']).columns):
-        inputs[col] = inputs[col].apply(lambda x: convert_to_binary(x))
-    print(inputs)
-    inputs=scaler.transform(inputs)
-    tensor_input=torch.tensor(inputs, dtype=torch.float32)
-    model.eval()
-    # Get model predictions
-    with torch.no_grad():  # No need for gradient tracking
-        outputs = model(tensor_input)
-    print(outputs)
+    def get_life_data(self, inputs=None):
+        if inputs is None:
+            # Get inputs
+            inputs=get_life_inputs()
+        # Prep Inputs
+        inputs=pd.DataFrame(inputs,columns=self.cols)
+        for i,col in enumerate(inputs.select_dtypes(include=['object']).columns):
+            inputs[col] = inputs[col].apply(lambda x: convert_to_binary(x))
+        inputs=self.scaler.transform(inputs)
+        tensor_input=torch.tensor(inputs, dtype=torch.float32)
+        # Get model predictions
+        self.eval()
+        with torch.no_grad():
+            output = self(tensor_input)
+        output = pd.DataFrame(output.numpy(), columns=[str(i) for i in range(23,168)])
+        #output.plot()
+        #plt.show()
+        #output.to_csv()
+        return output
 
 if __name__ == "__main__":
     from utils import load_prep_data
     model = NeuralNet()
-
-    # Split into train and test sets
-    # At the very least scaler and cols should be attributes of Neural Net so that they can be pickled
-    X_train, X_test, y_train, y_test, scaler, cols = load_prep_data('data.csv')
-
-    # This chuck could either be merged into load_prep_data or into NeuralNet class function
-    batch_size = 32
-    train_dataset = TensorDataset(X_train, y_train)
-    test_dataset = TensorDataset(X_test, y_test)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
-
-    #model.train_eval_save(1,1,True)
+    #train_loader=model.train_eval_save(1,1,True)
     model=load_model(NeuralNet)
-    #model.neural_net_eval()
-    print_life_data(cols)
+    #model.neural_net_eval(train_loader)
+    print(model.get_life_data([[180,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','n','n','n']]))
+    print(model.get_life_data())

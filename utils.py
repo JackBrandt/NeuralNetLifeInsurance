@@ -1,7 +1,7 @@
 import pandas as pd
 import torch
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.preprocessing import StandardScaler
 
 def convert_to_binary(value):
     """Converts 'm' or 'y' to 1, otherwise returns 0."""
@@ -78,4 +78,4 @@ def get_life_inputs():
         major_surgery_num, diabetes, hds, cholesterol, asthma, immune_defic,
         family_cancer, family_heart_disease, family_cholesterol
     ]
-    return inputs
+    return [inputs]
