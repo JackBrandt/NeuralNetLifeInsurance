@@ -19,9 +19,9 @@ def load_prep_data(file_path):
     df = pd.read_csv(file_path, header=0)
 
     # Extract target (y) and features (X)
-    empty=[0]*145
+    empty=[0]*96
     y_vals = df.iloc[:, 0].values  # First column is target
-    y_vals=[value-23 for value in y_vals]
+    y_vals=[value-25 for value in y_vals]
     y=[empty.copy() for _ in y_vals]
     for i,y_val in enumerate(y_vals):
         y[i][y_val]=1

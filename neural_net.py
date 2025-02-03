@@ -19,7 +19,7 @@ class NeuralNet(nn.Module):
         super(NeuralNet, self).__init__()
         self.fc1 = nn.Linear(23, 10)  # First hidden layer with 64 neurons
         #self.fc2 = nn.Linear(64, 128) # Second hidden layer with 128 neurons
-        self.fc2 = nn.Linear(10, 145) # Output layer with 95 neurons
+        self.fc2 = nn.Linear(10, 96) # Output layer with 95 neurons
         self.relu = nn.ReLU()
         self.softmax = nn.Softmax(dim=1)  # Apply softmax for multi-class classification
         self.optimizer = optim.Adam(self.parameters(), lr=0.001)
@@ -117,7 +117,7 @@ class NeuralNet(nn.Module):
         self.eval()
         with torch.no_grad():
             output = self(tensor_input)
-        output = pd.DataFrame(output.numpy(), columns=[str(i) for i in range(23,168)])
+        output = pd.DataFrame(output.numpy(), columns=[str(i) for i in range(25,121)])
         #output.plot()
         #plt.show()
         #output.to_csv()
@@ -126,9 +126,8 @@ class NeuralNet(nn.Module):
 if __name__ == "__main__":
     from utils import load_prep_data
     model = NeuralNet()
-    #train_loader=model.train_eval_save(1,1,True)
+    train_loader=model.train_eval_save(1,1,True)
     model=load_model(NeuralNet)
-    #model.neural_net_eval(train_loader)
+    model.neural_net_eval(train_loader)
     print(model.get_life_data([[180,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','n','n','n']]))
     print(model.get_life_data())
-    
