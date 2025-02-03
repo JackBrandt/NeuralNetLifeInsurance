@@ -3,12 +3,11 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
-import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from utils import get_life_inputs, convert_to_binary
 
-def load_model(model_class, filepath="model.pth"):
+def load_model(filepath="model.pth"):
     """Loads the saved model and returns an instance of it."""
     model = torch.load('model.pth', weights_only=False)
     model.eval()  # Set model to evaluation mode
@@ -132,3 +131,4 @@ if __name__ == "__main__":
     #model.neural_net_eval(train_loader)
     print(model.get_life_data([[180,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','n','n','n']]))
     print(model.get_life_data())
+    
