@@ -127,7 +127,7 @@ class NeuralNet(nn.Module):
 if __name__ == "__main__":
     from utils import load_prep_data, plot_mort, gaussian_smooth
     model = NeuralNet()
-    #train_loader=model.train_eval_save(1,1,True)
+    train_loader=model.train_eval_save(1,1,True)
     model=load_model(NeuralNet)
     #model.neural_net_eval(train_loader)
     mort_df=model.get_life_data([[180,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','n','n','n']])
