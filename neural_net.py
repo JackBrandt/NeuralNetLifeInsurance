@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 import pandas as pd
+
 from sklearn.preprocessing import StandardScaler
 from utils import get_life_inputs, convert_to_binary
 
@@ -117,17 +118,22 @@ class NeuralNet(nn.Module):
         self.eval()
         with torch.no_grad():
             output = self(tensor_input)
-        output = pd.DataFrame(output.numpy(), columns=[str(i) for i in range(25,121)])
-        #output.plot()
-        #plt.show()
+        output = pd.DataFrame(output.numpy())
+        output = output.transpose()
+        output.index=[str(i) for i in range(25,121)]
         #output.to_csv()
         return output
 
 if __name__ == "__main__":
-    from utils import load_prep_data
+    from utils import load_prep_data, plot_mort, gaussian_smooth
     model = NeuralNet()
-    train_loader=model.train_eval_save(1,1,True)
+    #train_loader=model.train_eval_save(1,1,True)
     model=load_model(NeuralNet)
-    model.neural_net_eval(train_loader)
-    print(model.get_life_data([[180,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','n','n','n']]))
-    print(model.get_life_data())
+    #model.neural_net_eval(train_loader)
+    mort_df=model.get_life_data([[180,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','n','n','n']])
+    plot_mort(mort_df)
+    print(mort_df)
+    smoothed_df = gaussian_smooth(mort_df, sigma=5)
+    plot_mort(smoothed_df)
+    print(smoothed_df)
+    #print(model.get_life_data())

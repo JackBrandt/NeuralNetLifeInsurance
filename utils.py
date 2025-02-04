@@ -2,6 +2,8 @@ import pandas as pd
 import torch
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
+from scipy.ndimage import gaussian_filter1d
 
 def convert_to_binary(value):
     """Converts 'm' or 'y' to 1, otherwise returns 0."""
@@ -79,3 +81,28 @@ def get_life_inputs():
         family_cancer, family_heart_disease, family_cholesterol
     ]
     return [inputs]
+
+def plot_mort(mort_df):
+        plt.figure(figsize=(10, 5))
+        plt.plot(mort_df.index, mort_df[0], marker='o', linestyle='-')
+        plt.xticks(rotation=90)  # Rotate x-axis labels for readability
+        plt.xlabel("Year")
+        plt.ylabel("Mort Rate")
+        plt.title("Line Plot of Mort Table")
+        plt.grid()
+
+        plt.show()
+
+def gaussian_smooth(df, sigma=15):
+    """
+    Applies Gaussian smoothing to a numerical DataFrame column.
+
+    Parameters:
+        df (pd.DataFrame): DataFrame containing numerical data.
+        sigma (float): Standard deviation of the Gaussian kernel. Higher values = more smoothing.
+
+    Returns:
+        pd.DataFrame: A new DataFrame with smoothed values.
+    """
+    smoothed_values = gaussian_filter1d(df[0], sigma=sigma, mode='nearest')
+    return pd.DataFrame({0: smoothed_values}, index=df.index)

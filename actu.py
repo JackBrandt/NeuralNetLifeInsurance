@@ -46,5 +46,12 @@ def life_liability_pv(fv,i,mort_tab, defer_yrs=0):
 
 # NOTE: With just life_liability_pv() we can calculate how much to charge for a life
 #   insurance policy *if* the customer wants to do a lump sum payment instead of
-#   an annuity
-
+#   an annuity.
+# Example
+if __name__ == "__main__":
+    from neural_net import load_model, NeuralNet
+    model=load_model(NeuralNet)
+    mort_df=model.get_life_data([[180,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','n','n','n']])
+    mort_tab=mort_df[0].to_numpy()
+    liability_pv=life_liability_pv(1000000,5,mort_tab)
+    print(f'A 1 million dollar life policy for the entered person would cost a ${liability_pv} lump payment up front.')
