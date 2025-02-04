@@ -55,3 +55,4 @@ if __name__ == "__main__":
     mort_tab=mort_df[0].to_numpy()
     liability_pv=life_liability_pv(1000000,5,mort_tab)
     print(f'A 1 million dollar life policy for the entered person would cost a ${liability_pv} lump payment up front.')
+
