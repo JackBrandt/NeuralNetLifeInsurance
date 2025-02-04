@@ -77,7 +77,7 @@ def life_liability_pv_q(fv,i,mort_tab, defer_yrs=0,quart=.5):
 
 #print(life_liability_pv(100,10,[.5,.5]))
 
-def pmt_mu(fv,i,mort_tab,defer_yrs=0):
+def life_pmt_mu(fv,i,mort_tab,defer_yrs=0):
     '''Calculates a fixed payment annuity payment
     to match the liability
     Args:
@@ -97,9 +97,10 @@ def pmt_mu(fv,i,mort_tab,defer_yrs=0):
     pmt=liability_pv/simple_annuity_pv_mu
     return pmt
 
-# NOTE: With just life_liability_pv() we can calculate how much to charge for a life
-#   insurance policy *if* the customer wants to do a lump sum payment instead of
-#   an annuity.
+# All of the life functions can be reused for a life insurance policy
+# that ends at a certain age by just removing the last however many rows from the table
+# The new table won't add up to 1, but that's because then there is a chance people won't die in that period
+
 # Example
 if __name__ == "__main__":
     from neural_net import load_model, NeuralNet
@@ -107,9 +108,9 @@ if __name__ == "__main__":
     mort_df=model.get_life_data([[180,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','n','n','n']])
     # Currently this is working on the unsmoothed data, add smoothing later
     mort_tab=mort_df[0].to_numpy()
-    liability_pv=life_liability_pv_mu(1000000,5,mort_tab)
-    liability_pv_med=life_liability_pv_q(1000000,5,mort_tab)
-    fixed_pmt=pmt_mu(1000000,5,mort_tab)
+    liability_pv=life_liability_pv_mu(1000000,1,mort_tab)
+    liability_pv_med=life_liability_pv_q(1000000,1,mort_tab)
+    fixed_pmt=life_pmt_mu(1000000,1,mort_tab)
     print(f'A 1 million dollar life policy for the entered person would cost a ${liability_pv:.2f} lump payment up front.')
     print(f'The same policy has median liability present value of ${liability_pv_med:.2f}')
     print(f'This policy could be payed for by a lifetime fixed annuity of ${fixed_pmt:.2f} per year.')

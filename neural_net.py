@@ -137,3 +137,8 @@ if __name__ == "__main__":
     plot_mort(smoothed_df)
     print(smoothed_df)
     #print(model.get_life_data())
+    # TODO: Create neural nets for people over 25,
+    #  that is train a neural net on the mortality rates, given the person doesn't die when 25
+    # then repeat for the next year up and so on, this means a lot of neural nets to train/store/use
+    # but we probably don't need to do every possible neural net, i.e., we can stop once a certain age is reached
+    
