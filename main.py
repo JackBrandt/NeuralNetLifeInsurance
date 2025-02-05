@@ -1,4 +1,6 @@
 import streamlit as st
+from actu import actu_str
+from neural_net import NeuralNet
 
 # Title
 st.title("Death Predictors: Neural Network Life Insurance Calculator")
@@ -7,6 +9,7 @@ st.title("Death Predictors: Neural Network Life Insurance Calculator")
 st.sidebar.header("IDK sidebar stuff")
 
 # Main stuff
+# TODO: Replace text_input with number_input with sensible parameters (e.g., height should be positive)
 st.write("Please enter your personal info and risk factors below to get started")
 weight = st.text_input("Weight(lbs): ")
 sex = st.text_input("Sex(m/f): ")
@@ -43,10 +46,11 @@ for i,input in enumerate(inputs):
     except:
         pass
 
-# Main Content
 st.write(f"You entered: {inputs}")
 
 # Interactive Components
-st.write('After you enter your personal information, click the button to calculate your expected insurance cost')
+st.write('After you enter your personal information, enter how much you want your policy to pay and click the button to calculate your expected insurance cost')
+fv=st.number_input("Policy Amount",1)
 if st.button("Click me"):
-    st.success("Button clicked!")
+    st.write(actu_str(inputs,fv))
+
