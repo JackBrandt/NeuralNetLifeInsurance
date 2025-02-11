@@ -6,17 +6,19 @@ from utils import load_fold_data
 from torch.utils.data import DataLoader, TensorDataset
 from actu import life_liability_pv_mu, payout_pv
 
-def actuarial_model_eval(I,fold_num=5):
+#TODO: Split this big function into several smaller functions
+def actuarial_model_eval(I,training_reps,fold_num=5):
     '''Evaluates the performance of our model with regard to actuarial performance
     Args:
         I: The interest rate as a percentage, e.g. 1% => 1
-        fold_num: The number of folds, must be a factor of 10000, warning large numbers
-            will take ages to run
+        training_reps: The number of times the training set is ran through the model,
+            high numbers cause overfitting and poor performance
+        fold_num: The number of folds, must be a factor of 10000
     '''
     # Step 1: Load data and split into folds
     X_tensor,y_tensor,scalar,input_cols = load_fold_data('data.csv')
-    X_folds=X_tensor.split(2000) # Creates 5 parallel folds in X and y
-    y_folds=y_tensor.split(2000)
+    X_folds=X_tensor.split(int(10000/fold_num)) # Creates 5 parallel folds in X and y
+    y_folds=y_tensor.split(int(10000/fold_num))
 
     # Step 2: Loop through folds
     liability_difference=0
@@ -41,7 +43,7 @@ def actuarial_model_eval(I,fold_num=5):
 
         # Now we train the model
         NN_model = NeuralNet()
-        NN_model.neural_net_train(train_loader,2,False)
+        NN_model.neural_net_train(train_loader,training_reps,False)
 
         # Now we test: Compare expected liability with actual
 
@@ -68,8 +70,8 @@ def actuarial_model_eval(I,fold_num=5):
         diff=actual_liability-expect_liability
         print(f'Difference between actual liability and expected liability is: {diff}')
         liability_difference+=diff
-    average_diff_percent=liability_difference/5/2000*100
+    average_diff_percent=liability_difference/100
     print(f'The average difference between actual and expected liability is {average_diff_percent:.4f}%')
 
 if __name__ == "__main__":
-    actuarial_model_eval(1)
+    actuarial_model_eval(1,2,100)
