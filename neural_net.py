@@ -41,7 +41,7 @@ class NeuralNet(nn.Module):
         print(f"Model saved to {filepath}")
 
     # Training loop
-    def neural_net_train(self,train_loader, epoch=1):
+    def neural_net_train(self,train_loader, epoch=1, print_statement=True):
         '''Trains the nn
         Args:
             epoch (int): number of times to run through the data'''
@@ -59,7 +59,8 @@ class NeuralNet(nn.Module):
                 self.optimizer.step()  # Update weights
                 running_loss += loss.item()
                 batch_counter+=1
-            print(f"Epoch {epoch+1}/{num_epochs}, Loss: {running_loss/len(train_loader):.4f}")
+            if print_statement:
+                print(f"Epoch {epoch+1}/{num_epochs}, Loss: {running_loss/len(train_loader):.4f}")
         print("Training complete!")
 
     # Evaluation
