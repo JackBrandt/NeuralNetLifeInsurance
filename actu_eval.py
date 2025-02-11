@@ -6,7 +6,6 @@ from utils import load_fold_data
 from torch.utils.data import DataLoader, TensorDataset
 from actu import life_liability_pv_mu, payout_pv
 
-#TODO: Split this big function into several smaller functions
 def actuarial_model_eval(I,training_reps,fold_num=5,smooth=False,sigma=5):
     '''Evaluates the performance of our model with regard to actuarial performance
     Args:
@@ -76,3 +75,7 @@ def actuarial_model_eval(I,training_reps,fold_num=5,smooth=False,sigma=5):
 if __name__ == "__main__":
     #actuarial_model_eval(1,2,10)
     actuarial_model_eval(1,2,10,True,10)
+    # Conclusion: Smoothing improves accuracy and reduces bias
+    # Not sure on ideal sigma though...
+    # Also need to test number of training reps...
+    # And layers...
