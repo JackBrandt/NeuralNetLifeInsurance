@@ -5,6 +5,8 @@ from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 from scipy.ndimage import gaussian_filter1d
 
+#TODO: Fix function headers
+
 def convert_to_binary(value):
     """Converts 'm' or 'y' to 1, otherwise returns 0."""
     return 1 if str(value).lower() in ["m", "y"] else 0
@@ -47,6 +49,43 @@ def load_prep_data(file_path):
     # Split into train and test sets
     X_train, X_test, y_train, y_test =  train_test_split(X_tensor, y_tensor, test_size=0.2, random_state=42)
     return X_train, X_test, y_train, y_test, scaler, input_cols
+
+def load_fold_data(file_path):
+    '''Loads and preps data...
+    Args:
+        file_path (str):...
+    Returns:
+        X (array of arrays)
+        y (array of arrays)
+    '''
+    # Load CSV file
+    df = pd.read_csv(file_path, header=0)
+
+    # Extract target (y) and features (X)
+    empty=[0]*96
+    y_vals = df.iloc[:, 0].values  # First column is target
+    y_vals=[value-25 for value in y_vals]
+    y=[empty.copy() for _ in y_vals]
+    for i,y_val in enumerate(y_vals):
+        y[i][y_val]=1
+    #print(y_vals[0])
+    #print(y[0][72])
+    X = df.iloc[:, 1:].copy()  # Everything else is features
+    input_cols=X.columns
+    # Convert categorical columns to numerical values
+    for col in X.select_dtypes(include=['object']).columns:
+        X[col] = X[col].apply(lambda x: convert_to_binary(x))
+
+    # Normalize numerical features
+    scaler = StandardScaler()
+    X = scaler.fit_transform(X)  # Standardize input features
+
+    # Convert to PyTorch tensors
+    #print(y)
+    X_tensor = torch.tensor(X, dtype=torch.float32)
+    y_tensor = torch.tensor(y, dtype=torch.float32)  # Use long for classification
+
+    return X_tensor,y_tensor, scaler, input_cols
 
 def get_life_inputs():
     weight = float(input("Weight(lbs): "))

@@ -104,16 +104,19 @@ class NeuralNet(nn.Module):
             self.save_model()
         return test_loader # For testing loading
 
-    def get_life_data(self, inputs=None):
+    def get_life_data(self, inputs=None, is_tensor=False):
         if inputs is None:
             # Get inputs
             inputs=get_life_inputs()
-        # Prep Inputs
-        inputs=pd.DataFrame(inputs,columns=self.cols)
-        for i,col in enumerate(inputs.select_dtypes(include=['object']).columns):
-            inputs[col] = inputs[col].apply(lambda x: convert_to_binary(x))
-        inputs=self.scaler.transform(inputs)
-        tensor_input=torch.tensor(inputs, dtype=torch.float32)
+        if is_tensor==False:
+            # Prep Inputs
+            inputs=pd.DataFrame(inputs,columns=self.cols)
+            for i,col in enumerate(inputs.select_dtypes(include=['object']).columns):
+                inputs[col] = inputs[col].apply(lambda x: convert_to_binary(x))
+            inputs=self.scaler.transform(inputs)
+            tensor_input=torch.tensor(inputs, dtype=torch.float32)
+        else:
+            tensor_input=inputs
         # Get model predictions
         self.eval()
         with torch.no_grad():
@@ -141,4 +144,4 @@ if __name__ == "__main__":
     #  that is train a neural net on the mortality rates, given the person doesn't die when 25
     # then repeat for the next year up and so on, this means a lot of neural nets to train/store/use
     # but we probably don't need to do every possible neural net, i.e., we can stop once a certain age is reached
-    
+
