@@ -106,7 +106,7 @@ class NeuralNet(nn.Module):
             self.save_model()
         return test_loader # For testing loading
 
-    def get_life_data(self, inputs=None, is_tensor=False,smooth=False):
+    def get_life_data(self, inputs=None, is_tensor=False,smooth=False,sigma=5):
         if inputs is None:
             # Get inputs
             inputs=get_life_inputs()
@@ -128,7 +128,7 @@ class NeuralNet(nn.Module):
         output.index=[str(i) for i in range(25,121)]
         #output.to_csv()
         if smooth:
-            return gaussian_smooth(output,5)
+            return gaussian_smooth(output,sigma)
         else:
             return output
 
@@ -141,7 +141,7 @@ if __name__ == "__main__":
     mort_df=model.get_life_data([[180,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','n','n','n']])
     plot_mort(mort_df)
     print(mort_df)
-    smoothed_df = gaussian_smooth(mort_df, sigma=5)
+    smoothed_df = gaussian_smooth(mort_df, sigma=10)
     #print(smoothed_df.sum())
     plot_mort(smoothed_df)
     print(smoothed_df)

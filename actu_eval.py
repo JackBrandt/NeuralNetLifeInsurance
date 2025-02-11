@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader, TensorDataset
 from actu import life_liability_pv_mu, payout_pv
 
 #TODO: Split this big function into several smaller functions
-def actuarial_model_eval(I,training_reps,fold_num=5,smooth=False):
+def actuarial_model_eval(I,training_reps,fold_num=5,smooth=False,sigma=5):
     '''Evaluates the performance of our model with regard to actuarial performance
     Args:
         I: The interest rate as a percentage, e.g. 1% => 1
@@ -60,7 +60,7 @@ def actuarial_model_eval(I,training_reps,fold_num=5,smooth=False):
         individuals = fold.split(1)
         expect_liability=0
         for indiv in individuals:
-            mort_df=NN_model.get_life_data(indiv,True,smooth)
+            mort_df=NN_model.get_life_data(indiv,True,smooth,sigma)
             mort_tab=mort_df[0].to_numpy()
             #print(mort_tab)
             expect_liability+=life_liability_pv_mu(1,I,mort_tab)
@@ -75,4 +75,4 @@ def actuarial_model_eval(I,training_reps,fold_num=5,smooth=False):
 
 if __name__ == "__main__":
     #actuarial_model_eval(1,2,10)
-    actuarial_model_eval(1,2,10,True)
+    actuarial_model_eval(1,2,10,True,10)
