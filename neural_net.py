@@ -34,6 +34,14 @@ class NeuralNet(nn.Module):
         self.batch_size = 32
         # self.scaler = StandardScaler()
         self.cols = []
+        self.criterion = AgeMortalityLoss(
+            num_ages=96,
+            alpha=0.1,
+            label_smoothing=0.05,
+            heavy_smoothing_region=(70, 75),   # example: treat "older ages" region more carefully
+            heavy_smoothing_factor=5.0
+        )
+        self.optimizer = optim.Adam(self.parameters(), lr=0.001)
 
     def forward(self, x):
         x = self.relu(self.fc1(x))
@@ -48,13 +56,12 @@ class NeuralNet(nn.Module):
         print(f"Model saved to {filepath}")
 
     # Training loop
-    def neural_net_train(self, train_loader, criterion, optimizer, epochs=5,print_statement=True):
+    def neural_net_train(self, train_loader, epochs=5,print_statement=True):
         '''Trains the nn
         Args:
             epoch (int): number of times to run through the data
             train_loader (DataLoader): the data to train on
-            criterion (nn.Module): the loss function
-            optimizer (optim.Optimizer): the optimizer to use'''
+        '''
         self.train()
         num_epochs = 1  # Set number of epochs
         for epoch in range(num_epochs):
@@ -62,11 +69,11 @@ class NeuralNet(nn.Module):
             batch_counter=1
             for inputs, labels in train_loader:
                 #print(batch_counter)
-                optimizer.zero_grad()  # Zero the gradients
+                self.optimizer.zero_grad()  # Zero the gradients
                 logits = self(inputs)  # Forward pass
-                loss = criterion(logits, labels)  # Compute loss
+                loss = self.criterion(logits, labels)  # Compute loss
                 loss.backward()  # Backpropagation
-                optimizer.step()  # Update weights
+                self.optimizer.step()  # Update weights
                 running_loss += loss.item()
                 batch_counter+=1
             if print_statement:
@@ -74,7 +81,7 @@ class NeuralNet(nn.Module):
         print("Training complete!")
 
     # Evaluation
-    def neural_net_eval(self, test_loader, criterion):
+    def neural_net_eval(self, test_loader):
         self.eval()  # Set to evaluation mode
         sum_of_mean_absolute_errors=0
         # with torch.no_grad():
@@ -100,17 +107,16 @@ class NeuralNet(nn.Module):
         with torch.no_grad():
             for inputs, labels in test_loader:
                 logits = model(inputs)
-                loss = criterion(logits, labels)
+                loss = self.criterion(logits, labels)
                 total_loss += loss.item()
         avg_loss = total_loss / len(test_loader)
         print(f"Test Loss: {avg_loss:.4f}")
 
-    def train_eval_save(self, reps, criterion, optimizer, epoch, eval_always=True):
+    def train_eval_save(self, reps, epoch, eval_always=True):
         '''Trains, evaluates, and saves model:
         Args:
             reps: Number loops of training/eval
             epoch: Number of trainings between evals
-            criterion: Loss function
             eval_always: Defaults to true, if false doesn't evaluate until final train'''
         X_train, X_test, y_train, y_test, self.scaler, self.cols = load_prep_data('data.csv')
         train_dataset = TensorDataset(X_train, y_train)
@@ -118,9 +124,9 @@ class NeuralNet(nn.Module):
         train_loader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True)
         test_loader = DataLoader(test_dataset, batch_size=self.batch_size, shuffle=False)
         for i in range(reps):
-            self.neural_net_train(train_loader, criterion, optimizer, epoch)#Change epoch to do more training between evals
+            self.neural_net_train(train_loader, epoch)#Change epoch to do more training between evals
             if eval_always or i == reps:
-                self.neural_net_eval(test_loader, criterion)
+                self.neural_net_eval(test_loader)
             self.save_model()
         return test_loader # For testing loading
 
@@ -156,16 +162,7 @@ class NeuralNet(nn.Module):
 if __name__ == "__main__":
     model = NeuralNet()
 
-    criterion = AgeMortalityLoss(
-            num_ages=96,
-            alpha=0.1,
-            label_smoothing=0.05,
-            heavy_smoothing_region=(70, 75),   # example: treat "older ages" region more carefully
-            heavy_smoothing_factor=5.0
-        )
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
-
-    train_loader = model.train_eval_save(reps=50, criterion=criterion, optimizer=optimizer, epoch=5)
+    train_loader = model.train_eval_save(reps=1, epoch=500)
 
     model=load_model(NeuralNet)
 
