@@ -1,3 +1,5 @@
+TODO List
+
 TODO: Create neural nets for people over 25,
     that is train a neural net on the mortality rates, given the person doesn't die when 25
     then repeat for the next year up and so on, this means a lot of neural nets to train/store/use
