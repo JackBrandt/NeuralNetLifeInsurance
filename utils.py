@@ -122,9 +122,9 @@ def get_life_inputs():
     return [inputs]
 
 def plot_mort(mort_df):
-        plt.figure(figsize=(20, 5))
+        plt.figure(figsize=(10, 5))
         plt.plot(mort_df.index, mort_df[0], marker='o', linestyle='-')
-        plt.xticks(rotation=25)  # Rotate x-axis labels for readability
+        plt.xticks(rotation=90)  # Rotate x-axis labels for readability
         plt.xlabel("Year")
         plt.ylabel("Mort Rate")
         plt.title("Line Plot of Mort Table")
