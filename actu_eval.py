@@ -74,15 +74,8 @@ def actuarial_model_eval(I,training_reps,fold_num=5,smooth=False,sigma=5):
 
 if __name__ == "__main__":
     #actuarial_model_eval(1,2,10)
-    actuarial_model_eval(1,50,10,True,10)
-    # Conclusion: Smoothing improves accuracy and reduces bias on standard loss function
-    # Smoothing brings us to 0 + or - .5% difference
+    actuarial_model_eval(1,2,10,True,10)
+    # Conclusion: Smoothing improves accuracy and reduces bias
     # Not sure on ideal sigma though...
     # Also need to test number of training reps...
     # And layers...
-
-    # Custom loss function:
-    # Note on standard loss function, training reps of 2 seeems to be okay so far
-    # However, training reps of 50 still struggles to achieve decent accuracy with custom loss function
-    # Smoothed and un smoothed seem to be about 1.5 to 20% difference
-    # Suggesting standard loss function is better than custom loss function
