@@ -42,7 +42,7 @@ def actuarial_model_eval(I,training_reps,fold_num=5,smooth=False,sigma=5):
 
         # Now we train the model
         NN_model = NeuralNet()
-        NN_model.neural_net_train(train_loader,epochs=training_reps,print_statement=False)
+        NN_model.neural_net_train(train_loader,training_reps,False)
 
         # Now we test: Compare expected liability with actual
 
