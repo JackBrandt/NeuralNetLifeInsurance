@@ -103,23 +103,25 @@ def life_pmt_mu(fv,i,mort_tab,defer_yrs=0):
 # The new table won't add up to 1, but that's because then there is a chance people won't die in that period
 
 
-def actu_str(inputs,fv):
+def actu_str(inputs,fv,age):
     '''Returns a string with information about insurance for an individual
     Args:
         inputs: the paramaters for the neural net prediction
         fv: How much you want the policy to payout
+        lia_dif: How many years til the liability begins (i.e., how many years til you turn 25)
     Returns:
         Str
     '''
     I=1
-    model=load_model('model.pth')
+    path='models/'+str(age)+'.pth'
+    model=load_model(path)
     mort_df=model.get_life_data([inputs])
     # Currently this is working on the unsmoothed data, add smoothing later
     mort_tab=mort_df[0].to_numpy()
     liability_pv=life_liability_pv_mu(fv,I,mort_tab)
     liability_pv_med=life_liability_pv_q(fv,I,mort_tab)
     fixed_pmt=life_pmt_mu(fv,I,mort_tab)
-    cost_str=f'A 1 million dollar life policy for the entered person would cost a \${liability_pv:.2f} lump payment up front.\n'+\
+    cost_str=f'A \${fv:,.2f} life policy for the entered person would cost a \${liability_pv:.2f} lump payment up front.\n'+\
     f'The same policy has median liability present value of \${liability_pv_med:.2f}\n'+\
     f'This policy could be payed for by a lifetime fixed annuity of \${fixed_pmt:.2f} per year.'
     return cost_str

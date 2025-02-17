@@ -45,6 +45,7 @@ for i,input in enumerate(inputs):
         inputs[i]=float(input)
     except:
         pass
+age=st.text_input('Current age:')
 
 st.write(f"You entered: {inputs}")
 
@@ -52,5 +53,5 @@ st.write(f"You entered: {inputs}")
 st.write('After you enter your personal information, enter how much you want your policy to pay and click the button to calculate your expected insurance cost')
 fv=st.number_input("Policy Amount",1)
 if st.button("Click me"):
-    st.write(actu_str(inputs,fv))
+    st.write(actu_str(inputs,fv,age))
 
