@@ -145,8 +145,27 @@ class NeuralNet(nn.Module):
         else:
             return output
 
-def make_all_models(age_cap):
-    for age in range(25,80):
+def make_all_models(age_cap: int):
+    """
+    Generate and train NeuralNet models for ages 25-age_cap with fixed training parameters.
+
+    Creates a series of models for each age from 25 to age_cap-1 (inclusive), trains them using
+    hardcoded training parameters, and saves them via train_eval_save().
+
+    Args:
+        age_cap (int): non-included age cap
+
+    Returns:
+        None: Models are saved but not returned directly
+
+    Example:
+        >>> make_all_models(80)
+
+    Note:
+        - Uses fixed training params: 2 epochs, 1 batch_size, save=True
+        - Sequential execution may take substantial time for 55 models
+    """
+    for age in range(25,age_cap):
         model=NeuralNet(age)
         model.train_eval_save(2,1,True)
 
