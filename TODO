@@ -1,9 +1,4 @@
-TODO List
-
-TODO: Create neural nets for people over 25,
-    that is train a neural net on the mortality rates, given the person doesn't die when 25
-    then repeat for the next year up and so on, this means a lot of neural nets to train/store/use
-    but we probably don't need to do every possible neural net, i.e., we can stop once a certain age is reached
+TODO LIST
 
 TODO: Add the possibility to have life insurance that has an age limit, e.g., a policy that runs for 20 years or death
     whatever comes first
@@ -16,6 +11,11 @@ TODO: Update function/file headers
 
 TODO: Fix neural net so that the saved version has been trained on all of the data instead of only 80% of instead
 
-TODO: Decide on loss function
-
 TODO: Split big function into several smaller functions (e.g., actu_eval)
+
+DONE: Decide on loss function
+
+Done: Create neural nets for people over 25,
+    that is train a neural net on the mortality rates, given the person doesn't die when 25
+    then repeat for the next year up and so on, this means a lot of neural nets to train/store/use
+    but we probably don't need to do every possible neural net, i.e., we can stop once a certain age is reached

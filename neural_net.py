@@ -4,24 +4,35 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 import pandas as pd
-from utils import gaussian_smooth
+from utils import gaussian_smooth,load_prep_data
 
 from sklearn.preprocessing import StandardScaler
 from utils import get_life_inputs, convert_to_binary
 
-def load_model(filepath="model.pth"):
-    """Loads the saved model and returns an instance of it."""
-    model = torch.load('model.pth', weights_only=False)
+def load_model(filepath: str):
+    """
+    Load a saved PyTorch model from disk and set it to evaluation mode.
+
+    Args:
+        filepath (str): Path to the saved model file (.pt or .pth format)
+
+    Returns:
+        torch.nn.Module: Loaded PyTorch model in evaluation mode
+
+    Example:
+        >>> model=load_model('models/25.pth')
+    """
+    model = torch.load(filepath, weights_only=False)
     model.eval()  # Set model to evaluation mode
     print(f"Model loaded from {filepath}")
     return model
 
 class NeuralNet(nn.Module):
-    def __init__(self):
+    def __init__(self,age):
         super(NeuralNet, self).__init__()
         self.fc1 = nn.Linear(23, 10)  # First hidden layer with 64 neurons
         #self.fc2 = nn.Linear(64, 128) # Second hidden layer with 128 neurons
-        self.fc2 = nn.Linear(10, 96) # Output layer with 95 neurons
+        self.fc2 = nn.Linear(10, int(96-(age-25))) # Output layer with 95 neurons
         self.relu = nn.ReLU()
         self.softmax = nn.Softmax(dim=1)  # Apply softmax for multi-class classification
         self.optimizer = optim.Adam(self.parameters(), lr=0.001)
@@ -36,8 +47,10 @@ class NeuralNet(nn.Module):
         x = self.fc2(x)
         return self.softmax(x)  # Use softmax if classification
 
-    def save_model(self, filepath="model.pth"):
+    def save_model(self):
         """Saves the neural network model."""
+        age=25+96-self.fc2.out_features
+        filepath='models/'+str(age)+'.pth'
         torch.save(self, filepath)  # Save model parameters
         print(f"Model saved to {filepath}")
 
@@ -94,7 +107,7 @@ class NeuralNet(nn.Module):
             reps: Number loops of training/eval
             epoch: Number of trainings between evals
             eval_always: Defaults to true, if false doesn't evaluate until final train'''
-        X_train, X_test, y_train, y_test, self.scaler, self.cols = load_prep_data('data.csv')
+        X_train, X_test, y_train, y_test, self.scaler, self.cols = load_prep_data('data.csv',25+(96-self.fc2.out_features))
         train_dataset = TensorDataset(X_train, y_train)
         test_dataset = TensorDataset(X_test, y_test)
         train_loader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True)
@@ -125,29 +138,27 @@ class NeuralNet(nn.Module):
             output = self(tensor_input)
         output = pd.DataFrame(output.numpy())
         output = output.transpose()
-        output.index=[str(i) for i in range(25,121)]
+        output.index=[str(i) for i in range(25+(96-self.fc2.out_features),121)]
         #output.to_csv()
         if smooth:
             return gaussian_smooth(output,sigma)
         else:
             return output
 
+def make_all_models(age_cap):
+    for age in range(25,80):
+        model=NeuralNet(age)
+        model.train_eval_save(2,1,True)
+
 if __name__ == "__main__":
-    from utils import load_prep_data, plot_mort
-    model = NeuralNet()
-    #train_loader=model.train_eval_save(2,1,True) # Minimum of 2 reps it seems is necessary for bell curve shape
-    model=load_model(NeuralNet)
-    #model.neural_net_eval(train_loader)
+    from utils import plot_mort
+    make_all_models(26)
+    model=load_model('models/25.pth')
     mort_df=model.get_life_data([[180,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','n','n','n']])
     plot_mort(mort_df)
     print(mort_df)
     smoothed_df = gaussian_smooth(mort_df, sigma=10)
     #print(smoothed_df.sum())
     plot_mort(smoothed_df)
-    print(smoothed_df)
-    #print(model.get_life_data())
-    # TODO: Create neural nets for people over 25,
-    #  that is train a neural net on the mortality rates, given the person doesn't die when 25
-    # then repeat for the next year up and so on, this means a lot of neural nets to train/store/use
-    # but we probably don't need to do every possible neural net, i.e., we can stop once a certain age is reached
+    #print(smoothed_df)
 

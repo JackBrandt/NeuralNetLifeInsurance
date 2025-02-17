@@ -11,7 +11,7 @@ def convert_to_binary(value):
     """Converts 'm' or 'y' to 1, otherwise returns 0."""
     return 1 if str(value).lower() in ["m", "y"] else 0
 
-def load_prep_data(file_path):
+def load_prep_data(file_path,age):
     '''Loads and preps data...
     Args:
         file_path (str):...
@@ -21,11 +21,12 @@ def load_prep_data(file_path):
     '''
     # Load CSV file
     df = pd.read_csv(file_path, header=0)
+    df = df[df['age'] >= age]
 
     # Extract target (y) and features (X)
-    empty=[0]*96
+    empty=[0]*(int(96-(age-25)))
     y_vals = df.iloc[:, 0].values  # First column is target
-    y_vals=[value-25 for value in y_vals]
+    y_vals=[value-age for value in y_vals]
     y=[empty.copy() for _ in y_vals]
     for i,y_val in enumerate(y_vals):
         y[i][y_val]=1
