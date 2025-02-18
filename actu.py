@@ -127,7 +127,7 @@ def actu_str(inputs,fv,age,payment_type=None):
         def_years=25-age
     path='models/'+str(int(age+def_years))+'.pth'
     model=load_model(path)
-    mort_df=model.get_life_data([inputs])
+    mort_df=model.get_life_data([inputs],False,True,sigma=10)
     # Currently this is working on the unsmoothed data, add smoothing later
     mort_tab=mort_df[0].to_numpy()
     match payment_type:

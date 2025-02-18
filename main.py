@@ -54,4 +54,3 @@ payment_type=st.pills("Payment Type", ['Lump','Annual','Monthly','Compare Option
 
 if st.button("Click me"):
     st.write(actu_str(inputs,fv,age,payment_type))
-
