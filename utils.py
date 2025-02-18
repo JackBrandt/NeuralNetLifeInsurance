@@ -146,3 +146,20 @@ def gaussian_smooth(df, sigma=15):
     """
     smoothed_values = gaussian_filter1d(df[0], sigma=sigma, mode='nearest')
     return pd.DataFrame({0: smoothed_values}, index=df.index)
+
+def sex_format(sex_option):
+    if sex_option=='m': return "Male"
+    return "Female"
+
+def yn_format(yn):
+    if yn=='y': return "Yes"
+    return "No"
+
+def risk_num_format(num):
+    match num:
+        case 1:
+            return "Low"
+        case 2:
+            return "Medium"
+        case _:
+            return "High"

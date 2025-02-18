@@ -39,6 +39,11 @@ def annuity_pv(n,i,pmt):
     i=i/100
     return (1-(1+i)**-n)/i
 
+def simple_annuity_fv(n,i,pmt):
+    pv=annuity_pv(n,i,1)
+    i=i/100
+    return pv*((1+i)**n)
+
 #print(annuity_pv(5,5,1))
 
 def life_liability_pv_mu(fv,i,mort_tab, defer_yrs=0):
@@ -98,12 +103,16 @@ def life_pmt_mu(fv,i,mort_tab,defer_yrs=0):
     pmt=liability_pv/simple_annuity_pv_mu
     return pmt
 
+def annual_to_monthly_pmt(annual_payment,i):
+    monthly_i=((1+i/100)**(1/12)-1)*100
+    return annual_payment/simple_annuity_fv(12,monthly_i,1)
+
 # All of the life functions can be reused for a life insurance policy
 # that ends at a certain age by just removing the last however many rows from the table
 # The new table won't add up to 1, but that's because then there is a chance people won't die in that period
 
 
-def actu_str(inputs,fv,age):
+def actu_str(inputs,fv,age,payment_type=None):
     '''Returns a string with information about insurance for an individual
     Args:
         inputs: the paramaters for the neural net prediction
@@ -121,13 +130,26 @@ def actu_str(inputs,fv,age):
     mort_df=model.get_life_data([inputs])
     # Currently this is working on the unsmoothed data, add smoothing later
     mort_tab=mort_df[0].to_numpy()
-    liability_pv=life_liability_pv_mu(fv,I,mort_tab,def_years)
-    liability_pv_med=life_liability_pv_q(fv,I,mort_tab,def_years)
-    fixed_pmt=life_pmt_mu(fv,I,mort_tab,def_years)
-    cost_str=f'A \${fv:,.2f} life policy for this {age} year-old person would cost a \${liability_pv:.2f} lump payment up front.\n'+\
-    f'The same policy has median liability present value of \${liability_pv_med:.2f}\n'+\
-    f'This policy could be payed for by a lifetime fixed annuity of \${fixed_pmt:.2f} per year.'
-    return cost_str
+    match payment_type:
+        case 'Lump':
+            liability_pv=life_liability_pv_mu(fv,I,mort_tab,def_years)
+            return f'A \${fv:,.2f} life policy for this {age} year-old person would cost a \${liability_pv:.2f} lump payment up front.'
+        case 'Annual':
+            fixed_pmt=life_pmt_mu(fv,I,mort_tab,def_years)
+            return f'A \${fv:,.2f} life policy for this {age} year-old person would cost fixed annual payment of \${fixed_pmt:.2f}.'
+        case 'Monthly':
+            fixed_pmt=life_pmt_mu(fv,I,mort_tab,def_years)
+            fixed_pmt=annual_to_monthly_pmt(fixed_pmt,I)
+            return f'A \${fv:,.2f} life policy for this {age} year-old person would cost fixed monthly payment of \${fixed_pmt:.2f}.'
+        case _:
+            liability_pv=life_liability_pv_mu(fv,I,mort_tab,def_years)
+            liability_pv_med=life_liability_pv_q(fv,I,mort_tab,def_years)
+            fixed_pmt=life_pmt_mu(fv,I,mort_tab,def_years)
+            monthly_pmt=annual_to_monthly_pmt(fixed_pmt,I)
+            cost_str=f'A \${fv:,.2f} life policy for this {age} year-old person would cost a \${liability_pv:.2f} lump payment up front.\n'+\
+            f'The same policy has median liability present value of \${liability_pv_med:.2f}\n'+\
+            f'This policy could be payed for by a lifetime fixed annuity of \${fixed_pmt:.2f} per year or a fixed monthly payment of \${monthly_pmt:.2f}'
+            return cost_str
 
 # Example
 if __name__ == "__main__":

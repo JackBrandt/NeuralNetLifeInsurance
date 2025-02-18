@@ -1,26 +1,9 @@
 import streamlit as st
 from actu import actu_str
 from neural_net import NeuralNet
-
+from utils import sex_format,yn_format,risk_num_format
 # Title
 st.title("Death Predictors: Neural Network Life Insurance Calculator")
-
-def sex_format(sex_option):
-    if sex_option=='m': return "Male"
-    return "Female"
-
-def yn_format(yn):
-    if yn=='y': return "Yes"
-    return "No"
-
-def risk_num_format(num):
-    match num:
-        case 1:
-            return "Low"
-        case 2:
-            return "Medium"
-        case _:
-            return "High"
 
 # Main stuff
 # TODO: Replace text_input with number_input with sensible parameters (e.g., height should be positive)
@@ -64,8 +47,11 @@ age=st.number_input('What\'s your current age?',max_value=79,value=25,min_value=
 #st.write(f"You entered: {inputs}")
 
 # Interactive Components
-st.write('After you enter your personal information, enter how much you want your policy to pay and click the button to calculate your expected insurance cost')
+st.write('After you enter your personal information, enter policy amount, and payment type, then click the button to calculate your expected insurance cost')
 fv=st.number_input("Policy Amount",125000)
+
+payment_type=st.pills("Payment Type", ['Lump','Annual','Monthly','Compare Options'], selection_mode="single", label_visibility="visible")
+
 if st.button("Click me"):
-    st.write(actu_str(inputs,fv,age))
+    st.write(actu_str(inputs,fv,age,payment_type))
 
