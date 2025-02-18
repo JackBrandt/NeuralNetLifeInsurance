@@ -113,19 +113,22 @@ def actu_str(inputs,fv,age):
         Str
     '''
     I=1
-    path='models/'+str(age)+'.pth'
+    def_years=0
+    if age<25:
+        def_years=25-age
+    path='models/'+str(int(age+def_years))+'.pth'
     model=load_model(path)
     mort_df=model.get_life_data([inputs])
     # Currently this is working on the unsmoothed data, add smoothing later
     mort_tab=mort_df[0].to_numpy()
-    liability_pv=life_liability_pv_mu(fv,I,mort_tab)
-    liability_pv_med=life_liability_pv_q(fv,I,mort_tab)
-    fixed_pmt=life_pmt_mu(fv,I,mort_tab)
-    cost_str=f'A \${fv:,.2f} life policy for the entered person would cost a \${liability_pv:.2f} lump payment up front.\n'+\
+    liability_pv=life_liability_pv_mu(fv,I,mort_tab,def_years)
+    liability_pv_med=life_liability_pv_q(fv,I,mort_tab,def_years)
+    fixed_pmt=life_pmt_mu(fv,I,mort_tab,def_years)
+    cost_str=f'A \${fv:,.2f} life policy for this {age} year-old person would cost a \${liability_pv:.2f} lump payment up front.\n'+\
     f'The same policy has median liability present value of \${liability_pv_med:.2f}\n'+\
     f'This policy could be payed for by a lifetime fixed annuity of \${fixed_pmt:.2f} per year.'
     return cost_str
 
 # Example
 if __name__ == "__main__":
-    print(actu_str([180,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','n','n','n'],1000000))
+    print(actu_str([180,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','n','n','n'],250000,20))
