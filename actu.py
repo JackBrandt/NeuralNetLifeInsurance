@@ -1,5 +1,17 @@
 from neural_net import load_model, NeuralNet
 from utils import policy_type_format
+
+def get_mort_tab(age,inputs):
+    if age<25:
+        def_years=25-age
+    else:
+        def_years=0
+    path='models/'+str(int(age+def_years))+'.pth'
+    model=load_model(path)
+    mort_df=model.get_life_data([inputs],False,True,sigma=10)
+    mort_tab=mort_df[0].to_numpy()
+    return mort_tab
+
 def payout_pv(fv, n, i):
     '''Calculates the present value of a payment in n years at a given interest rate
     Args:
