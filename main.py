@@ -2,7 +2,7 @@ import streamlit as st
 from actu import actu_str
 from utils import sex_format,yn_format,risk_num_format,policy_type_format
 # Title
-st.title("Death Predictors: Neural Network Life Insurance Calculator")
+st.title("Neural Net Life Cost Predictor")
 
 # Main stuff
 # TODO: Replace text_input with number_input with sensible parameters (e.g., height should be positive)
@@ -61,4 +61,4 @@ elif policy_type in ['fl','fd']:
     payment_type=st.pills("Payment Type", ['Lump','Annual','Monthly','Compare Options'], selection_mode="single", label_visibility="visible")
 
 if st.button("Click me"):
-    st.write(actu_str(inputs,fv,age,policy_type,duration,payment_type))
+    st.write(actu_str(inputs,fv,age,policy_type,duration,payment_type,st.session_state['interest_rate']))

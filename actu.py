@@ -129,7 +129,7 @@ def annual_to_monthly_pmt(annual_payment,i):
 # The new table won't add up to 1, but that's because then there is a chance people won't die in that period
 
 
-def actu_str(inputs,fv,age,policy_type='fl',duration=None,payment_type=None):
+def actu_str(inputs,fv,age,policy_type='fl',duration=None,payment_type=None,I=1):
     '''Returns a string with information about insurance for an individual
     Args:
         inputs: the paramaters for the neural net prediction
@@ -138,7 +138,6 @@ def actu_str(inputs,fv,age,policy_type='fl',duration=None,payment_type=None):
     Returns:
         Str
     '''
-    I=1
     def_years=0
     if age<25:
         def_years=25-age
