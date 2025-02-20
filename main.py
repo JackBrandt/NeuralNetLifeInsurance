@@ -1,12 +1,20 @@
 import streamlit as st
 from actu import actu_str
-from neural_net import NeuralNet
-from utils import sex_format,yn_format,risk_num_format
+from utils import sex_format,yn_format,risk_num_format,policy_type_format
 # Title
 st.title("Death Predictors: Neural Network Life Insurance Calculator")
 
 # Main stuff
 # TODO: Replace text_input with number_input with sensible parameters (e.g., height should be positive)
+
+policy_type=st.pills("Enter Desired Policy Type", ['fl','fd','v'],key='pol_type', selection_mode="single", format_func=policy_type_format, label_visibility="visible")
+age=st.number_input('What\'s your current age?',max_value=79,value=25,min_value= 25 if policy_type=='v' else 0)
+if policy_type=='fd':
+    duration=st.number_input("Policy Duration (years): ", 1 if age>24 else 26-age,int(120-age),20,1)
+else:
+    duration=None
+fv=st.number_input("Policy Amount",125000)
+
 st.write("Please enter your personal info and risk factors below to get started")
 weight = st.text_input("Weight(lbs): ")
 sex = st.pills("Sex:", ['m','f'],key='sex', selection_mode="single", format_func=sex_format, label_visibility="visible")
@@ -42,15 +50,15 @@ for i,input in enumerate(inputs):
         inputs[i]=float(input)
     except:
         pass
-age=st.number_input('What\'s your current age?',max_value=79,value=25,min_value=0)
 
 #st.write(f"You entered: {inputs}")
 
 # Interactive Components
-st.write('After you enter your personal information, enter policy amount, and payment type, then click the button to calculate your expected insurance cost')
-fv=st.number_input("Policy Amount",125000)
-
-payment_type=st.pills("Payment Type", ['Lump','Annual','Monthly','Compare Options'], selection_mode="single", label_visibility="visible")
+st.write('After you enter your personal information, enter payment type then click the button to calculate your expected insurance cost')
+if policy_type=='v':
+    payment_type=st.pills("Payment Type", ['Annual','Monthly'], selection_mode="single", label_visibility="visible")
+elif policy_type in ['fl','fd']:
+    payment_type=st.pills("Payment Type", ['Lump','Annual','Monthly','Compare Options'], selection_mode="single", label_visibility="visible")
 
 if st.button("Click me"):
-    st.write(actu_str(inputs,fv,age,payment_type))
+    st.write(actu_str(inputs,fv,age,policy_type,duration,payment_type))

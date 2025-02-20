@@ -163,3 +163,15 @@ def risk_num_format(num):
             return "Medium"
         case _:
             return "High"
+
+def policy_type_format(pol_type,duration=None):
+    match pol_type:
+        case 'fl':
+            return 'Fixed-Rate for Life'
+        case 'fd':
+            if duration==None:
+                return 'Fixed-Rate for Duration'
+            else:
+                return f'fixed-rate for duration of {duration} years'
+        case _:
+            return 'Variable Rate'
