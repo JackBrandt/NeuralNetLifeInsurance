@@ -18,7 +18,7 @@ if st.session_state["people/prices"]==None:# Generate 3 random people
     # Calculate how much each of them would cost for a life insurance policy
     price1,price2 = price2people(person1,person2)
     # Ensure they are separate enough
-    while abs(price1-price2)<15000:#Maybe this value can be a difficulty setting
+    while abs(price1-price2)<1500:#Maybe this value can be a difficulty setting
         person1,person2 = generate2people()
         price1,price2 = price2people(person1,person2)
     print(price1,price2)
