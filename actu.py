@@ -134,7 +134,11 @@ def annual_to_monthly_pmt(annual_payment,i):
     monthly_i=((1+i/100)**(1/12)-1)*100
     return annual_payment/simple_annuity_fv(12,monthly_i,1)
 
-
+def years_left_mu(mort_tab,def_yrs):
+    mu=0
+    for i,p in enumerate(mort_tab):
+        mu+=i*p
+    return mu+def_yrs
 
 # All of the life functions can be reused for a life insurance policy
 # that ends at a certain age by just removing the last however many rows from the table

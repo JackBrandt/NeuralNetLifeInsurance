@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
 import streamlit as st
-from actu import life_liability_pv_mu,get_mort_tab
+from actu import life_liability_pv_mu,get_mort_tab,\
+      years_left_mu
 from neural_net import NeuralNet
 from faker import Faker
 from utils import sex_format,risk_num_format
@@ -52,12 +53,26 @@ def generate2people():
     return person1,person2
 
 def price_person(person,I):
-    fv=12500
+    fv=1250
     person=person[1:]
     age=person[0]
     inputs=person[1:]
     mort_tab=get_mort_tab(age,inputs)
     return life_liability_pv_mu(fv,I,mort_tab,0)
+
+def get_yrs_left(person):
+    person=person[1:]
+    age=person[0]
+    if age<25:
+        def_yrs=25-age
+    else:
+        def_yrs=0
+    inputs=person[1:]
+    mort_tab=get_mort_tab(age,inputs)
+    return years_left_mu(mort_tab,def_yrs)
+
+def get2yrsleft(person1,person2):
+    return get_yrs_left(person1),get_yrs_left(person2)
 
 def price3people(person1,person2,person3,I=1):
     price1=price_person(person1,I)
