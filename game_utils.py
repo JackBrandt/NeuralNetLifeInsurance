@@ -52,7 +52,7 @@ def generate2people():
     return person1,person2
 
 def price_person(person,I):
-    fv=125000
+    fv=12500
     person=person[1:]
     age=person[0]
     inputs=person[1:]
@@ -83,7 +83,7 @@ def yn_to_bool(yn):
         return False
 
 def print_person(person):
-    st.header(person[0] + ' is...')
+    st.subheader(person[0] + ' is...')
     st.markdown('**'+ str(person[1])+'** years old')
     st.markdown('**' + str(person[2]) + '** pounds')
     st.markdown('**' + sex_format(person[3])+'**')

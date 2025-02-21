@@ -12,4 +12,14 @@ if 'people/prices' not in st.session_state:
     st.session_state["people/prices"]=None
 if 'score' not in st.session_state:
     st.session_state['score']=0
+if 'guessed' not in st.session_state:
+    st.session_state['guessed']=False
+
+js = '''
+<script>
+    var body = window.parent.document.querySelector(".main");
+    console.log(body);
+    body.scrollTop = 0;
+</script>
+'''
 pg.run()
