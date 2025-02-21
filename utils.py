@@ -4,6 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 from scipy.ndimage import gaussian_filter1d
+import streamlit as st
 
 #TODO: Fix function headers
 
@@ -175,3 +176,17 @@ def policy_type_format(pol_type,duration=None):
                 return f'fixed-rate for duration of {duration} years'
         case _:
             return 'Variable Rate'
+
+def store_value(perm_key):
+    # Copy the value to the permanent key
+    st.session_state[perm_key] = st.session_state["_"+perm_key]
+
+def load_value(perm_key):
+    # Copy the value to the permanent key
+    st.session_state["_"+perm_key] = st.session_state[perm_key]
+
+def get_storage_function(perm_key):
+    return lambda : store_value(perm_key)
+
+def get_loading_function(perm_key):
+    return lambda : load_value(perm_key)

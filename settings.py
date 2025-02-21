@@ -1,8 +1,9 @@
 import streamlit as st
+from utils import get_storage_function,get_loading_function
 st.title("Settings")
-def store_value():
-    # Copy the value to the permanent key
-    st.session_state["interest_rate"] = st.session_state["_interest_rate"]
 
-st.session_state["_interest_rate"] = st.session_state["interest_rate"]
-st.number_input("Enter custom interest rate",key="_interest_rate",on_change=store_value)
+store_i = get_storage_function("interest_rate")
+load_i = get_loading_function("interest_rate")
+
+load_i()
+st.number_input("Enter custom interest rate",key="_interest_rate",on_change=store_i)

@@ -8,4 +8,8 @@ settings = st.Page("settings.py",title="Settings",icon='⚙️')
 pg = st.navigation([main_page,death_predictor,settings])
 if 'interest_rate' not in st.session_state:
     st.session_state["interest_rate"]=1
+if 'people/prices' not in st.session_state:
+    st.session_state["people/prices"]=None
+if 'score' not in st.session_state:
+    st.session_state['score']=0
 pg.run()
