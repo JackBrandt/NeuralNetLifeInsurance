@@ -1,7 +1,7 @@
 import streamlit as st
 from neural_net import NeuralNet
 
-main_page = st.Page("main.py", title="Neural Net Life Cost Predictor")
+main_page = st.Page("main.py", title="Neural Net Life Cost Predictor", icon='🧮')
 death_predictor = st.Page("death_predictor.py",title="Death Predictor Game",icon='🎮')
 settings = st.Page("settings.py",title="Settings",icon='⚙️')
 

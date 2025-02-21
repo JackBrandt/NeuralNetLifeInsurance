@@ -76,37 +76,54 @@ def yn_to_does_not(yn):
     else:
         return 'do not'
 
+def yn_to_bool(yn):
+    if yn=='y':
+        return True
+    else:
+        return False
+
 def print_person(person):
     st.header(person[0] + ' is...')
     st.markdown('**'+ str(person[1])+'** years old')
-    st.markdown('Weighs **' + str(person[2]) + '** pounds')
-    st.markdown('**' + sex_format(person[3]).lower()+'**')
+    st.markdown('**' + str(person[2]) + '** pounds')
+    st.markdown('**' + sex_format(person[3])+'**')
     st.markdown('**' + str(person[4]) + "** inches tall")
     st.markdown('Their blood pressure is **' + str(person[5])+'**')
-    st.markdown('They **' + yn_to_does_not(person[6])+ '** smoke')
-    st.markdown('They **' + yn_to_does_not(person[7])+ '** use other forms of nicotine (like vaping or chewing tobacco)')
+    st.markdown('Their cholesterol is **' + str(person[19])+'**')
     st.markdown('They are on **' + str(person[8])+ '** medications')
     st.markdown('Their occupation harzard is **' + risk_num_format(person[9]).lower()+'**')
     st.markdown('Their lifestyle harzard is **' + risk_num_format(person[10]).lower()+'**')
-    st.markdown('They **' + yn_to_does_not(person[11])+ '** use weed')
-    print(person[11])
-    st.markdown('They **' + yn_to_does_not(person[12])+ '** use opiods')
-    st.markdown('They **' + yn_to_does_not(person[13])+ '** use other drugs')
-    st.markdown('They have **' + str(person[14])+ '** drinks per week')
-    st.markdown('They **' + yn_to_does_not(person[15])+ '** have a history of addiction')
     st.markdown('They have had **' + str(person[16])+ '** major surgeries')
-    st.markdown('They **' + yn_to_does_not(person[17])+ '** have diabetes')
-    st.markdown('They **' + yn_to_does_not(person[18])+ '** have a history of heart disease or stroke')
-    st.markdown('Their cholesterol is **' + str(person[19])+'**')
-    st.markdown('They **' + yn_to_does_not(person[20])+ '** have asthma')
-    st.markdown('They **' + yn_to_does_not(person[21])+ '** have an immune deficiency')
-    st.markdown('They **' + yn_to_does_not(person[22])+ '** have a family history of cancer')
-    st.markdown('They **' + yn_to_does_not(person[23])+ '** have a family history of heart disease or stroke')
-    st.markdown('They **' + yn_to_does_not(person[24])+ '** have a family history of high cholesterol')
+    st.markdown('They have **' + str(person[14])+ '** drinks per week')
+    if yn_to_bool(person[6]):
+        st.markdown('They **smoke**')
+    if yn_to_bool(person[7]):
+        st.markdown('They use alternative forms of nicotine (like vaping or chewing tobacco)')
+    if yn_to_bool(person[11]):
+        st.markdown('They use **weed**')
+    if yn_to_bool(person[12]):
+        st.markdown('They use **opiods**')
+    if yn_to_bool(person[13]):
+        st.markdown('They use recreational drugs (besides alcohol, nicotine, weed, or opioids)')
+    if yn_to_bool(person[15]):
+        st.markdown('They have a history of **addiction**')
+    if yn_to_bool(person[17]):
+        st.markdown('They **' + yn_to_does_not(person[17])+ '** have diabetes')
+    if yn_to_bool(person[18]):
+        st.markdown('They have a **history of heart disease or stroke**')
+    if yn_to_bool(person[20]):
+        st.markdown('They have **asthma**')
+    if yn_to_bool(person[21]):
+        st.markdown('They have an **immune deficiency**')
+    if yn_to_bool(person[22]):
+        st.markdown('They have a **family history of cancer**')
+    if yn_to_bool(person[23]):
+        st.markdown('They have a *family history of heart disease or stroke*')
+    if yn_to_bool(person[24]):
+        st.markdown('They have a *family history of high cholesterol*')
 
 def print3people(person1,person2,person3):
     col1, col2, col3 = st.columns(3,border=True,gap='medium')
-
     with col1:
         print_person(person1)
     with col2:
@@ -116,7 +133,6 @@ def print3people(person1,person2,person3):
 
 def print2people(person1,person2):
     col1, col2 = st.columns(2,border=True,gap='medium')
-
     with col1:
         print_person(person1)
     with col2:
