@@ -17,12 +17,17 @@ while abs(price1-price2)<15000:#Maybe this value can be a difficulty setting
     price1,price2 = price2people(person1,person2)
     print(price1,price2)
 # Display them
+st.header('Consider these 2 people: ')
 print2people(person1,person2)
 # Have user pick an option
 # If they're right add the value of the policy
 # If they're wrong subtract the value of the selected policy
 # Let them keep picking until they get it right
 # Then repeat
-#st.button('Option 1', key='option1', on_click=check_answer1())
-#st.button('Option 2', key='option1', on_click=check_answer2())
-#st.button('Option 3', key='option1', on_click=check_answer3())
+st.header('Which of them do you think statistically has longer left to live?')
+col1,col2,col3,col4=st.columns((.13,.3,.2,.37))
+with col2:
+    st.pills(label='',options=[person1[0]])
+with col4:
+    st.pills(label='',options=[person2[0]])
+
