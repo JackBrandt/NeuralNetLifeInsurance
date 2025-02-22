@@ -41,9 +41,9 @@ print2people(person1,person2)
 # Let them keep picking until they get it right
 # Then repeat
 col1,col2,col3,col4=st.columns((.13,.3,.2,.37))
-def update_score(amount):
+def update_score(amount,age):
     st.session_state['guessed']=True
-    if amount==min(price1,price2):
+    if age==max(mu1,mu2):
         st.session_state['score']=score+amount
     else:
         st.session_state['score']=score-amount
@@ -60,14 +60,14 @@ with col2:
             st.subheader('Correct!')
             st.text('Remaining Life Expectancies of:')
             st.text(f'{mu1:.1f} vs {mu2:.1f}')
-            st.text(f'Plus {round(price1)} points')
+            st.text(f'Plus {round(price1,mu1)} points')
             #score+=price1
             #st.session_state['score']=score
         else:
             st.subheader('Wrong!')
             st.text('Remaining Life Expectancies of:')
             st.text(f'{mu1:.1f} vs {mu2:.1f}')
-            st.text(f'Minus {round(price1)} points')
+            st.text(f'Minus {round(price1,mu1)} points')
             #score-=price1
             #st.session_state['score']=score
 with col4:
@@ -76,14 +76,14 @@ with col4:
             st.subheader('Correct!')
             st.text('Remaining Life Expectancies of:')
             st.text(f'{mu1:.1f} vs {mu2:.1f}')
-            st.text(f'Plus {round(price2)} points')
+            st.text(f'Plus {round(price2,mu2)} points')
             #score+=price2
             #st.session_state['score']=score
         else:
             st.subheader('Wrong!')
             st.text('Remaining Life Expectancies of:')
             st.text(f'{mu1:.1f} vs {mu2:.1f}')
-            st.text(f'Minus {round(price2)} points')
+            st.text(f'Minus {round(price2,mu2)} points')
             #score-=price2
             #st.session_state['score']=score
 
