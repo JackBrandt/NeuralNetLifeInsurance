@@ -47,8 +47,8 @@ def update_score(amount,age):
         st.session_state['score']=score+amount
     else:
         st.session_state['score']=score-amount
-update_w_price1 = lambda : update_score(price1)
-update_w_pricec2 = lambda : update_score(price2)
+update_w_price1 = lambda : update_score(price1,mu1)
+update_w_pricec2 = lambda : update_score(price2,mu2)
 
 def next_round():
     st.session_state['guessed']=False
@@ -60,14 +60,14 @@ with col2:
             st.subheader('Correct!')
             st.text('Remaining Life Expectancies of:')
             st.text(f'{mu1:.1f} vs {mu2:.1f}')
-            st.text(f'Plus {round(price1,mu1)} points')
+            st.text(f'Plus {round(price1)} points')
             #score+=price1
             #st.session_state['score']=score
         else:
             st.subheader('Wrong!')
             st.text('Remaining Life Expectancies of:')
             st.text(f'{mu1:.1f} vs {mu2:.1f}')
-            st.text(f'Minus {round(price1,mu1)} points')
+            st.text(f'Minus {round(price1)} points')
             #score-=price1
             #st.session_state['score']=score
 with col4:
@@ -76,14 +76,14 @@ with col4:
             st.subheader('Correct!')
             st.text('Remaining Life Expectancies of:')
             st.text(f'{mu1:.1f} vs {mu2:.1f}')
-            st.text(f'Plus {round(price2,mu2)} points')
+            st.text(f'Plus {round(price2)} points')
             #score+=price2
             #st.session_state['score']=score
         else:
             st.subheader('Wrong!')
             st.text('Remaining Life Expectancies of:')
             st.text(f'{mu1:.1f} vs {mu2:.1f}')
-            st.text(f'Minus {round(price2,mu2)} points')
+            st.text(f'Minus {round(price2)} points')
             #score-=price2
             #st.session_state['score']=score
 
