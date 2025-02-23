@@ -152,7 +152,49 @@ def update_score(mu1, mu2,amount,age):
     else:
         st.session_state['score']=score-amount
 
+def check_age_gap(mus,difficulty):
+    for i,age1 in enumerate(mus):
+        for age2 in mus[i+1:]:
+            if abs(age1-age2)<difficulty or abs(age1-age2)>(difficulty+10):
+                return True
+    return False
 
+def people_setup(num_people,difficulty):
+    if st.session_state['people/prices/mu'] is not None:
+        people=st.session_state["people/prices/mu"][0]
+        prices=st.session_state["people/prices/mu"][1]
+        mus=st.session_state["people/prices/mu"][2]
+        return people,mus,prices
+    people=generate_people(num_people)
+    # Calculate how much each of them would cost for a life insurance policy
+    mus=get_mus(people)
+    # Ensure they are separate enough
+    while check_age_gap(mus,difficulty):#Maybe this value can be a difficulty setting
+        people=generate_people(num_people)
+        mus=get_mus(people)
+    prices=price_people(people,1)
+    print(prices)
+    # Then save
+    st.session_state["people/prices/mu"]=[people,prices,mus]
+    return people,mus,prices
+
+def guess_button(person_index,update_function,people,mus,prices):
+    if st.button(people[person_index][0],key=f'person{person_index}',on_click=update_function,disabled=st.session_state['guessed']):
+        if mus[person_index] is max(mus):
+            st.subheader('Correct!')
+            st.text('Remaining Life Expectancies of:')
+            st.text(f'{mus[0]:.1f} vs {mus[1]:.1f}')
+            st.text(f'Plus {round(prices[person_index])} points')
+            #score+=price1
+            #st.session_state['score']=score
+        else:
+            st.subheader('Wrong!')
+            st.text('Remaining Life Expectancies of:')
+            st.text(f'{mus[0]:.1f} vs {mus[1]:.1f}')
+            print(prices[0])
+            st.text(f'Minus {round(prices[person_index])} points')
+            #score-=price1
+            #st.session_state['score']=score
 
 if __name__ == "__main__":
     #person1,person2,person3=generate3people()
