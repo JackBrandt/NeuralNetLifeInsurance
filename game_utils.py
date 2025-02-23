@@ -33,24 +33,14 @@ def generate_person(avoid_names=[]):
     person = np.append([name],[person])
     return person
 
-def generate3people():
-    # Probably easiest just to sample 3 random people from data.csv
-    person1=generate_person()
-    #print(person1)
-    person2=generate_person([person1[0]])
-    #print(person2)
-    person3=generate_person([person1[0],person2[0]])
-    #print(person3)
-    return person1,person2,person3
-#generate3people()
 
-def generate2people():
-    # Probably easiest just to sample 3 random people from data.csv
-    person1=generate_person()
-    #print(person1)
-    person2=generate_person([person1[0]])
-    #print(person2)
-    return person1,person2
+def generate_people(num_people):
+    people=[]
+    avoid_names=[]
+    for i in range(num_people):
+        people.append(generate_person(avoid_names))
+        avoid_names.append(people[i][0])
+    return people
 
 def price_person(person,I):
     fv=1250
@@ -71,8 +61,8 @@ def get_yrs_left(person):
     mort_tab=get_mort_tab(age,inputs)
     return years_left_mu(mort_tab,def_yrs)
 
-def get2yrsleft(person1,person2):
-    return get_yrs_left(person1),get_yrs_left(person2)
+def get_mus(people):
+    return [get_yrs_left(person) for person in people]
 
 def price3people(person1,person2,person3,I=1):
     price1=price_person(person1,I)
@@ -84,6 +74,9 @@ def price2people(person1,person2,I=1):
     price1=price_person(person1,I)
     price2=price_person(person2,I)
     return price1,price2
+
+def price_people(people,I=1):
+    return [price_person(person,I) for person in people]
 
 def yn_to_does_not(yn):
     if yn=='y':
@@ -117,7 +110,7 @@ def print_person(person):
     if yn_to_bool(person[11]):
         st.markdown('They use **weed**')
     if yn_to_bool(person[12]):
-        st.markdown('They use **opiods**')
+        st.markdown('They use **opioids**')
     if yn_to_bool(person[13]):
         st.markdown('They use recreational drugs (besides alcohol, nicotine, weed, or opioids)')
     if yn_to_bool(person[15]):
@@ -137,22 +130,31 @@ def print_person(person):
     if yn_to_bool(person[24]):
         st.markdown('They have a *family history of high cholesterol*')
 
-def print3people(person1,person2,person3):
-    col1, col2, col3 = st.columns(3,border=True,gap='medium')
-    with col1:
-        print_person(person1)
-    with col2:
-        print_person(person2)
-    with col3:
-        print_person(person3)
+def print_people(people):
+    columns = st.columns(len(people),border=True,gap='medium')
+    for i,col in enumerate(columns):
+        with col:
+            print_person(people[i])
 
-def print2people(person1,person2):
-    col1, col2 = st.columns(2,border=True,gap='medium')
-    with col1:
-        print_person(person1)
-    with col2:
-        print_person(person2)
+def dp_print_header():
+    score=st.session_state['score']
+    st.title('Death Predictor Game')
+    st.subheader('Who (statistically) has the longest left to live?')
+    st.markdown('Guess correctly to gain points, guess wrongly to lose points')
+    st.subheader(f'*Current Score:\t{round(score)}*')
+    return score
+
+def update_score(mu1, mu2,amount,age):
+    st.session_state['guessed']=True
+    score = st.session_state['score']
+    if age==max(mu1,mu2):
+        st.session_state['score']=score+amount
+    else:
+        st.session_state['score']=score-amount
+
+
 
 if __name__ == "__main__":
-    person1,person2,person3=generate3people()
-    print(price3people(person1,person2,person3))
+    #person1,person2,person3=generate3people()
+    #print(price3people(person1,person2,person3))
+    pass
