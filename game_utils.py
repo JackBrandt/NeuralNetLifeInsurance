@@ -64,17 +64,6 @@ def get_yrs_left(person):
 def get_mus(people):
     return [get_yrs_left(person) for person in people]
 
-def price3people(person1,person2,person3,I=1):
-    price1=price_person(person1,I)
-    price2=price_person(person2,I)
-    price3=price_person(person3,I)
-    return price1,price2,price3
-
-def price2people(person1,person2,I=1):
-    price1=price_person(person1,I)
-    price2=price_person(person2,I)
-    return price1,price2
-
 def price_people(people,I=1):
     return [price_person(person,I) for person in people]
 
@@ -144,10 +133,10 @@ def dp_print_header():
     st.subheader(f'*Current Score:\t{round(score)}*')
     return score
 
-def update_score(mu1, mu2,amount,age):
+def update_score(mus,amount,age):
     st.session_state['guessed']=True
     score = st.session_state['score']
-    if age==max(mu1,mu2):
+    if age==max(mus):
         st.session_state['score']=score+amount
     else:
         st.session_state['score']=score-amount
@@ -159,12 +148,21 @@ def check_age_gap(mus,difficulty):
                 return True
     return False
 
-def people_setup(num_people,difficulty):
+def people_setup(difficulty):
     if st.session_state['people/prices/mu'] is not None:
         people=st.session_state["people/prices/mu"][0]
         prices=st.session_state["people/prices/mu"][1]
         mus=st.session_state["people/prices/mu"][2]
+        if len(people)>2:
+            st.set_page_config(layout='wide')
+        else:
+            st.set_page_config(layout='centered')
         return people,mus,prices
+    num_people=np.random.randint(1,4)
+    if num_people>2:
+        st.set_page_config(layout='wide')
+    else:
+        st.set_page_config(layout='centered')
     people=generate_people(num_people)
     # Calculate how much each of them would cost for a life insurance policy
     mus=get_mus(people)
@@ -178,25 +176,22 @@ def people_setup(num_people,difficulty):
     st.session_state["people/prices/mu"]=[people,prices,mus]
     return people,mus,prices
 
+def mu_comparison(mus):
+    mu_str=f'{mus[0]:.1f}'
+    while len(mus)>1:
+        mus=mus[1:]
+        mu_str+=f' vs {mus[0]:.1f}'
+    st.text('Remaining Life Expectancies of:')
+    st.text(mu_str)
+
 def guess_button(person_index,update_function,people,mus,prices):
     if st.button(people[person_index][0],key=f'person{person_index}',on_click=update_function,disabled=st.session_state['guessed']):
         if mus[person_index] is max(mus):
             st.subheader('Correct!')
-            st.text('Remaining Life Expectancies of:')
-            st.text(f'{mus[0]:.1f} vs {mus[1]:.1f}')
+            mu_comparison(mus)
             st.text(f'Plus {round(prices[person_index])} points')
-            #score+=price1
-            #st.session_state['score']=score
         else:
             st.subheader('Wrong!')
-            st.text('Remaining Life Expectancies of:')
-            st.text(f'{mus[0]:.1f} vs {mus[1]:.1f}')
+            mu_comparison(mus)
             print(prices[0])
             st.text(f'Minus {round(prices[person_index])} points')
-            #score-=price1
-            #st.session_state['score']=score
-
-if __name__ == "__main__":
-    #person1,person2,person3=generate3people()
-    #print(price3people(person1,person2,person3))
-    pass
