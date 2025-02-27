@@ -12,7 +12,7 @@ def convert_to_binary(value):
     """Converts 'm' or 'y' to 1, otherwise returns 0."""
     return 1 if str(value).lower() in ["m", "y"] else 0
 
-def load_prep_data(file_path,age):
+def load_prep_data(file_path,age,test=True):
     '''Loads and preps data...
     Args:
         file_path (str):...
@@ -48,9 +48,12 @@ def load_prep_data(file_path,age):
     X_tensor = torch.tensor(X, dtype=torch.float32)
     y_tensor = torch.tensor(y, dtype=torch.float32)  # Use long for classification
 
-    # Split into train and test sets
-    X_train, X_test, y_train, y_test =  train_test_split(X_tensor, y_tensor, test_size=0.2, random_state=42)
-    return X_train, X_test, y_train, y_test, scaler, input_cols
+    if test:
+        # Split into train and test sets
+        X_train, X_test, y_train, y_test =  train_test_split(X_tensor, y_tensor, test_size=0.2, random_state=42)
+        return X_train, X_test, y_train, y_test, scaler, input_cols
+    else:
+        return X_tensor,y_tensor,scaler,input_cols
 
 def load_fold_data(file_path):
     '''Loads and preps data...
@@ -190,3 +193,42 @@ def get_storage_function(perm_key):
 
 def get_loading_function(perm_key):
     return lambda : load_value(perm_key)
+
+def st_get_inputs():
+    st.write("Please enter your personal info and risk factors below to get started")
+    weight = st.text_input("Weight(lbs): ")
+    sex = st.pills("Sex:", ['m','f'],key='sex', selection_mode="single", format_func=sex_format, label_visibility="visible")
+    height = st.text_input("Height(in): ")
+    sys_bp = st.text_input("Sys_BP: ")
+    smoker = st.pills("Do you smoke:", ['y','n'],key='smoke', selection_mode="single", format_func=yn_format, label_visibility="visible")
+    nic_other = st.pills("Do you use other forms of nicotine? (e.g., vape or chewing tobacco):", ['y','n'],key='nic', selection_mode="single", format_func=yn_format, label_visibility="visible")
+    num_meds = st.text_input("Number of medications: ")
+    occup_danger = st.pills("How would you describe your occupational danger? (Example: Underwater welding -> High, Office work -> Low)", [1,2,3],key='occupy', selection_mode="single", format_func=risk_num_format, label_visibility="visible")
+    ls_danger = st.pills("How would you describe your lifestyle danger? (Example: Frequent skydiving -> High, )", [1,2,3],key='ls', selection_mode="single", format_func=risk_num_format, label_visibility="visible")
+    cannabis = st.pills("Do you use cannabis, weed, or pot?", ['y','n'],key='weed', selection_mode="single", format_func=yn_format, label_visibility="visible")
+    opioids = st.pills("Do you use opioids?", ['y','n'],key='opioids', selection_mode="single", format_func=yn_format, label_visibility="visible")
+    other_drugs = st.pills("Do you use any other drugs:", ['y','n'],key='drugs', selection_mode="single", format_func=yn_format, label_visibility="visible")
+    drinks_aweek = st.text_input("Drinks per week: ")
+    addiction = st.pills("Do you have a history of addiction?", ['y','n'],key='addict', selection_mode="single", format_func=yn_format, label_visibility="visible")
+    major_surgery_num = st.text_input("Number of major surgeries: ")
+    diabetes = st.pills("Do you have diabetes?", ['y','n'],key='diab', selection_mode="single", format_func=yn_format, label_visibility="visible")
+    hds = st.pills("Do you have a history of heart disease or stroke?", ['y','n'],key='hds', selection_mode="single", format_func=yn_format, label_visibility="visible")
+    cholesterol = st.text_input("Cholesterol: ")
+    asthma = st.pills("Do you have asthma?", ['y','n'], selection_mode="single",key='asthma', format_func=yn_format, label_visibility="visible")
+    immune_defic = st.pills("Do you have an immune deficiency?", ['y','n'],key='immune', selection_mode="single", format_func=yn_format, label_visibility="visible")
+    family_cancer = st.pills("Do you have a family history of cancer?", ['y','n'],key='cancer', selection_mode="single", format_func=yn_format, label_visibility="visible")
+    family_heart_disease = st.pills("Do you have a family history of heart disease or stroke?", ['y','n'], key='familyhds',selection_mode="single", format_func=yn_format, label_visibility="visible")
+    family_cholesterol = st.pills("Do you have a family history of high cholesterol?", ['y','n'],key='chol', selection_mode="single", format_func=yn_format, label_visibility="visible")
+    inputs = [
+        weight, sex, height, sys_bp, smoker, nic_other, num_meds, occup_danger,
+        ls_danger, cannabis, opioids, other_drugs, drinks_aweek, addiction,
+        major_surgery_num, diabetes, hds, cholesterol, asthma, immune_defic,
+        family_cancer, family_heart_disease, family_cholesterol
+    ]
+    for i,input in enumerate(inputs):
+        try:
+            inputs[i]=float(input)
+        except:
+            pass
+    return inputs
+

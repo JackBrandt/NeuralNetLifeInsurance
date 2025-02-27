@@ -8,7 +8,7 @@ def get_mort_tab(age,inputs):
         def_years=0
     path='models/'+str(int(age+def_years))+'.pth'
     model=load_model(path)
-    mort_df=model.get_life_data([inputs],False,True,sigma=10)
+    mort_df=model.get_life_data([inputs],False,True,sigma=15)
     mort_tab=mort_df[0].to_numpy()
     return mort_tab
 

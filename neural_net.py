@@ -119,6 +119,19 @@ class NeuralNet(nn.Module):
             self.save_model()
         return test_loader # For testing loading
 
+    def train_save(self, reps, epoch):
+        '''Trains, evaluates, and saves model:
+        Args:
+            reps: Number loops of training/eval
+            epoch: Number of trainings between evals
+        '''
+        X_train, y_train, self.scaler, self.cols = load_prep_data('data.csv',25+(96-self.fc2.out_features),test=False)
+        train_dataset = TensorDataset(X_train, y_train)
+        train_loader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True)
+        for i in range(reps):
+            self.neural_net_train(train_loader,epoch)#Change epoch to do more training between evals
+            self.save_model()
+
     def get_life_data(self, inputs=None, is_tensor=False,smooth=False,sigma=5):
         if inputs is None:
             # Get inputs
@@ -167,11 +180,11 @@ def make_all_models(age_cap: int):
     """
     for age in range(25,age_cap):
         model=NeuralNet(age)
-        model.train_eval_save(2,1,True)
+        model.train_save(10,1)
 
 if __name__ == "__main__":
     from utils import plot_mort
-    make_all_models(26)
+    make_all_models(80)
     model=load_model('models/25.pth')
     mort_df=model.get_life_data([[180,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','n','n','n']])
     plot_mort(mort_df)
