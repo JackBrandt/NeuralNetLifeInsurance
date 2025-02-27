@@ -202,4 +202,4 @@ def actu_str(inputs,fv,age,policy_type='fl',duration=None,payment_type=None,I=1)
 
 # Example
 if __name__ == "__main__":
-    print(actu_str([180,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','n','n','n'],250000,20))
+    print(actu_str([160,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','y','y','y'],250000,20))

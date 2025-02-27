@@ -35,7 +35,7 @@ class NeuralNet(nn.Module):
         self.fc2 = nn.Linear(10, int(96-(age-25))) # Output layer with 95 neurons
         self.relu = nn.ReLU()
         self.softmax = nn.Softmax(dim=1)  # Apply softmax for multi-class classification
-        self.optimizer = optim.Adam(self.parameters(), lr=0.001)
+        self.optimizer = optim.Adam(self.parameters(), lr=0.005)
         self.criterion = nn.CrossEntropyLoss()  # Use for classification
         self.batch_size = 32
         self.scaler = StandardScaler()
@@ -180,7 +180,7 @@ def make_all_models(age_cap: int):
     """
     for age in range(25,age_cap):
         model=NeuralNet(age)
-        model.train_save(10,1)
+        model.train_save(1,1)
 
 if __name__ == "__main__":
     from utils import plot_mort

@@ -195,3 +195,6 @@ def guess_button(person_index,update_function,people,mus,prices):
             mu_comparison(mus)
             print(prices[0])
             st.text(f'Minus {round(prices[person_index])} points')
+
+if __name__ == '__main__':
+    print(get_yrs_left(['',26,160,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','y','y','y']))
