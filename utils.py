@@ -5,11 +5,53 @@ from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 from scipy.ndimage import gaussian_filter1d
 
+#TODO: Fix function headers
+
 def convert_to_binary(value):
     """Converts 'm' or 'y' to 1, otherwise returns 0."""
     return 1 if str(value).lower() in ["m", "y"] else 0
 
-def load_prep_data(file_path):
+def load_prep_data(file_path,age):
+    '''Loads and preps data...
+    Args:
+        file_path (str):...
+    Returns:
+        X (array of arrays)
+        y (array of arrays)
+    '''
+    # Load CSV file
+    df = pd.read_csv(file_path, header=0)
+    df = df[df['age'] >= age]
+
+    # Extract target (y) and features (X)
+    empty=[0]*(int(96-(age-25)))
+    y_vals = df.iloc[:, 0].values  # First column is target
+    y_vals=[value-age for value in y_vals]
+    y=[empty.copy() for _ in y_vals]
+    for i,y_val in enumerate(y_vals):
+        y[i][y_val]=1
+    #print(y_vals[0])
+    #print(y[0][72])
+    X = df.iloc[:, 1:].copy()  # Everything else is features
+    input_cols=X.columns
+    # Convert categorical columns to numerical values
+    for col in X.select_dtypes(include=['object']).columns:
+        X[col] = X[col].apply(lambda x: convert_to_binary(x))
+
+    # Normalize numerical features
+    scaler = StandardScaler()
+    X = scaler.fit_transform(X)  # Standardize input features
+
+    # Convert to PyTorch tensors
+    #print(y)
+    X_tensor = torch.tensor(X, dtype=torch.float32)
+    y_tensor = torch.tensor(y, dtype=torch.float32)  # Use long for classification
+
+    # Split into train and test sets
+    X_train, X_test, y_train, y_test =  train_test_split(X_tensor, y_tensor, test_size=0.2, random_state=42)
+    return X_train, X_test, y_train, y_test, scaler, input_cols
+
+def load_fold_data(file_path):
     '''Loads and preps data...
     Args:
         file_path (str):...
@@ -44,9 +86,7 @@ def load_prep_data(file_path):
     X_tensor = torch.tensor(X, dtype=torch.float32)
     y_tensor = torch.tensor(y, dtype=torch.float32)  # Use long for classification
 
-    # Split into train and test sets
-    X_train, X_test, y_train, y_test =  train_test_split(X_tensor, y_tensor, test_size=0.2, random_state=42)
-    return X_train, X_test, y_train, y_test, scaler, input_cols
+    return X_tensor,y_tensor, scaler, input_cols
 
 def get_life_inputs():
     weight = float(input("Weight(lbs): "))
@@ -83,9 +123,9 @@ def get_life_inputs():
     return [inputs]
 
 def plot_mort(mort_df):
-        plt.figure(figsize=(20, 5))
+        plt.figure(figsize=(10, 5))
         plt.plot(mort_df.index, mort_df[0], marker='o', linestyle='-')
-        plt.xticks(rotation=25)  # Rotate x-axis labels for readability
+        plt.xticks(rotation=90)  # Rotate x-axis labels for readability
         plt.xlabel("Year")
         plt.ylabel("Mort Rate")
         plt.title("Line Plot of Mort Table")
@@ -106,3 +146,20 @@ def gaussian_smooth(df, sigma=15):
     """
     smoothed_values = gaussian_filter1d(df[0], sigma=sigma, mode='nearest')
     return pd.DataFrame({0: smoothed_values}, index=df.index)
+
+def sex_format(sex_option):
+    if sex_option=='m': return "Male"
+    return "Female"
+
+def yn_format(yn):
+    if yn=='y': return "Yes"
+    return "No"
+
+def risk_num_format(num):
+    match num:
+        case 1:
+            return "Low"
+        case 2:
+            return "Medium"
+        case _:
+            return "High"
