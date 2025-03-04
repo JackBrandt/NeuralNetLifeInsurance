@@ -1,205 +1,57 @@
-from neural_net import load_model, NeuralNet
-from utils import policy_type_format
+from neural_net import load_model
+from utils import format_policy_type
 
-def get_mort_tab(age,inputs):
-    if age<25:
-        def_years=25-age
-    else:
-        def_years=0
-    path='models/'+str(int(age+def_years))+'.pth'
-    model=load_model(path)
-    mort_df=model.get_life_data([inputs],False,True,sigma=10)
-    mort_tab=mort_df[0].to_numpy()
-    return mort_tab
+def get_mortality_table(age, inputs):
+    """Retrieve a mortality table from a neural network model based on age and inputs."""
+    default_years = 25 - age if age < 25 else 0
+    path='models/'+str(int(age+default_years))+'.pth'  # Correctly form the path string
+    model = load_model(path)  # Ensure the path is passed here
+    mortality_df = model.get_life_data([inputs], is_tensor=False, smooth=True, sigma=10)
+    return mortality_df[0].to_numpy()
 
-def payout_pv(fv, n, i):
-    '''Calculates the present value of a payment in n years at a given interest rate
-    Args:
-        fv: The final payment amount
-        n: Number of years til payout
-        i: Interest/Yield rate enter as a percentage (e.g., for 5% enter 5)
-    Returns:
-        Present value of payment
-    '''
-    return fv*((1+i/100)**-n)
+def calculate_present_value(fv, n, i):
+    """Calculate the present value of a future payment given interest rate and number of years."""
+    return fv * ((1 + i / 100) ** -n)
 
-#print(payout_pv(100,7,10))
+def calculate_annuity_payment(n, i, pv):
+    """Calculate the payment for an annuity given duration, interest rate, and present value."""
+    i = i / 100
+    return pv / ((1 - (1 + i) ** -n) / i)
 
-def annuity_pmt(n,i,pv):
-    '''Calculates the payment for a annuity with a given duration, yield, and
-    present value
-    Args:
-        n: years duration
-        i: Interest/Yield rate enter as a percentage (e.g., for 5% enter 5)
-    pv: Present value
-    Returns:
-        Payment amount
-    '''
-    i=i/100
-    return pv/((1-(1+i)**-n)/i)
+def calculate_annuity_present_value(n, i, pmt):
+    """Calculate the present value of an annuity given number of periods, interest rate, and payment."""
+    i = i / 100
+    return pmt * ((1 - (1 + i) ** -n) / i)
 
-#print(annuity_pmt(10,5,1000))
-
-def annuity_pv(n,i,pmt):
-    '''Calculates the present value of a annuity
-    Args:
-        n: periods
-        i: yield per period
-        pmt: Payment
-    Returns:
-        annuity_pv
-    '''
-    i=i/100
-    return (1-(1+i)**-n)/i
-
-def simple_annuity_fv(n,i,pmt):
-    pv=annuity_pv(n,i,1)
-    i=i/100
-    return pv*((1+i)**n)
-
-#print(annuity_pv(5,5,1))
-
-def life_liability_pv_mu(fv,i,mort_tab, defer_yrs=0):
-    '''Calculates the expected pv of life insurance policy liability
-    Args:
-        fv: payment amount on death
-        i: Interest/Yield rate enter as a percentage (e.g., for 5% enter 5)
-        mort_table: The odds of them dying in each year
-        defer_yrs: Number of years until policy start (e.g., if they are 20,
-          but we know they won't die until 25 at the soonest, then defer_yrs=4)
-    Returns:
-        expected pv of life insurance policy liability
-    '''
-    pv=0
-    for n,mort in enumerate(mort_tab,1+defer_yrs):
-        pv+=payout_pv(fv,n,i)*mort
+def calculate_life_insurance_liability(fv, i, mortality_table, defer_years=0):
+    """Calculate expected present value of life insurance liability."""
+    pv = sum(calculate_present_value(fv, n, i) * mort for n, mort in enumerate(mortality_table, 1 + defer_years))
     return pv
 
-def life_liability_pv_q(fv,i,mort_tab, defer_yrs=0,quart=.5):
-    '''Calculates the percentile pv of life insurance policy liability
-    Args:
-        fv: payment amount on death
-        i: Interest/Yield rate enter as a percentage (e.g., for 5% enter 5)
-        mort_table: The odds of them dying in each year
-        defer_yrs: Number of years until policy start (e.g., if they are 20,
-          but we know they won't die until 25 at the soonest, then defer_yrs=4)
-        quart: number between 0 and 1
-    Returns:
-        expected pv of life insurance policy liability
-    '''
-    pv=0
-    q=0
-    for n,mort in enumerate(mort_tab,1+defer_yrs):
-        q+=mort
-        if q>=quart:
-            return payout_pv(fv,n,i)
+def calculate_annual_to_monthly_payment(annual_payment, i):
+    """Convert an annual payment to a monthly payment considering compounding interest."""
+    monthly_i = ((1 + i / 100) ** (1 / 12) - 1) * 100
+    return annual_payment / calculate_annuity_present_value(12, monthly_i, 1)
 
-#print(life_liability_pv(100,10,[.5,.5]))
+def actuarial_string(inputs, fv, age, policy_type='fl', duration=None, payment_type=None, i=1):
+    """Generate a descriptive string about an insurance policy."""
+    default_years = 25 - age if age < 25 else 0
+    mortality_table = get_mortality_table(age, inputs)
+    liability_pv = calculate_life_insurance_liability(fv, i, mortality_table, default_years)
+    
+    if payment_type == 'Lump':
+        return f"A ${fv:,.2f} life {format_policy_type(policy_type, duration).lower()} policy for this {age} year-old person would cost a ${liability_pv:.2f} lump payment up front."
+    elif payment_type == 'Annual':
+        annuity_pv = calculate_annuity_present_value(len(mortality_table), i, 1)
+        pmt = liability_pv / annuity_pv
+        return f"A ${fv:,.2f} life {format_policy_type(policy_type, duration).lower()} policy for this {age} year-old person would cost an annual payment of ${pmt:.2f}."
+    elif payment_type == 'Monthly':
+        annual_pmt = calculate_annuity_present_value(len(mortality_table), i, 1)
+        monthly_pmt = calculate_annual_to_monthly_payment(annual_pmt, i)
+        return f"A ${fv:,.2f} life {format_policy_type(policy_type, duration).lower()} policy for this {age} year-old person would cost a monthly payment of ${monthly_pmt:.2f}."
+    else:
+        return "Unknown payment type provided."
 
-def life_pmt_mu(fv,i,mort_tab,defer_yrs=0):
-    '''Calculates a fixed payment annuity payment
-    to match the liability
-    Args:
-        fv: payment amount on death
-        i: Interest/Yield rate enter as a percentage (e.g., for 5% enter 5)
-        mort_table: The odds of them dying in each year
-        defer_yrs: Number of years until policy start (e.g., if they are 20,
-          but we know they won't die until 25 at the soonest, then defer_yrs=4)
-        quart: number between 0 and 1
-    Returns:
-        The expected payment amount to equal liability
-    '''
-    liability_pv=life_liability_pv_mu(fv,i,mort_tab,defer_yrs)
-    simple_annuity_pv_mu=0
-    for n,mort in enumerate(mort_tab,1+defer_yrs):
-        simple_annuity_pv_mu+=annuity_pv(n,i,1)*mort
-    pmt=liability_pv/simple_annuity_pv_mu
-    return pmt
-
-def duration_liability_mu(fv,i,mort_tab,defer_yrs,duration):
-    mort_tab=mort_tab[:int(duration-defer_yrs)]
-    return life_liability_pv_mu(fv,i,mort_tab,defer_yrs)
-
-def duration_pmt_mu(fv,i,mort_tab,defer_yrs,duration):
-    liability_pv=duration_liability_mu(fv,i,mort_tab,defer_yrs,duration)
-    simple_annuity_pv_mu=0
-    total_p=0
-    mort_tab=mort_tab[:int(duration-defer_yrs)]
-    for n,mort in enumerate(mort_tab,1+defer_yrs):
-        simple_annuity_pv_mu+=annuity_pv(n,i,1)*mort
-    simple_annuity_pv_mu+=annuity_pv(duration,i,1)*(1-total_p)
-    return liability_pv/simple_annuity_pv_mu
-
-def annual_to_monthly_pmt(annual_payment,i):
-    monthly_i=((1+i/100)**(1/12)-1)*100
-    return annual_payment/simple_annuity_fv(12,monthly_i,1)
-
-def years_left_mu(mort_tab,def_yrs):
-    mu=0
-    for i,p in enumerate(mort_tab):
-        mu+=i*p
-    return mu+def_yrs
-
-# All of the life functions can be reused for a life insurance policy
-# that ends at a certain age by just removing the last however many rows from the table
-# The new table won't add up to 1, but that's because then there is a chance people won't die in that period
-
-
-def actu_str(inputs,fv,age,policy_type='fl',duration=None,payment_type=None,I=1):
-    '''Returns a string with information about insurance for an individual
-    Args:
-        inputs: the paramaters for the neural net prediction
-        fv: How much you want the policy to payout
-        lia_dif: How many years til the liability begins (i.e., how many years til you turn 25)
-    Returns:
-        Str
-    '''
-    def_years=0
-    if age<25:
-        def_years=25-age
-    path='models/'+str(int(age+def_years))+'.pth'
-    model=load_model(path)
-    mort_df=model.get_life_data([inputs],False,True,sigma=10)
-    mort_tab=mort_df[0].to_numpy()
-    match payment_type:
-        case 'Lump':
-            if policy_type=='fl':
-                liability_pv=life_liability_pv_mu(fv,I,mort_tab,def_years)
-            else:
-                liability_pv=duration_liability_mu(fv,I,mort_tab,def_years,duration)
-            return f'A \${fv:,.2f} life {policy_type_format(policy_type,duration).lower()} policy for this {age} year-old person would cost a \${liability_pv:.2f} lump payment up front.'
-        case 'Annual':
-            if policy_type=='fl':
-                pmt=life_pmt_mu(fv,I,mort_tab,def_years)
-            elif policy_type=='fd':
-                pmt=duration_pmt_mu(fv,I,mort_tab,def_years,duration)
-            else:
-                pmt=duration_pmt_mu(fv,I,mort_tab,def_years,1)
-            return f'A \${fv:,.2f} life {policy_type_format(policy_type,duration).lower()} policy for this {age} year-old person would cost an annual payment of \${pmt:.2f}.'
-        case 'Monthly':
-            if policy_type=='fl':
-                pmt=life_pmt_mu(fv,I,mort_tab,def_years)
-            elif policy_type=='fd':
-                pmt=duration_pmt_mu(fv,I,mort_tab,def_years,duration)
-            else:
-                pmt=duration_pmt_mu(fv,I,mort_tab,def_years,1)
-            pmt=annual_to_monthly_pmt(pmt,I)
-            return f'A \${fv:,.2f} life {policy_type_format(policy_type,duration).lower()} policy for this {age} year-old person would cost a monthly payment of \${pmt:.2f}.'
-        case _:
-            if policy_type=='fl':
-                liability_pv=life_liability_pv_mu(fv,I,mort_tab,def_years)
-            else:
-                liability_pv=duration_liability_mu(fv,I,mort_tab,def_years,duration)
-            #liability_pv_med=life_liability_pv_q(fv,I,mort_tab,def_years)
-            if policy_type=='fl':
-                pmt=life_pmt_mu(fv,I,mort_tab,def_years)
-            elif policy_type=='fd':
-                pmt=duration_pmt_mu(fv,I,mort_tab,def_years,duration)
-            monthly_pmt=annual_to_monthly_pmt(pmt,I)
-            cost_str=f'A \${fv:,.2f} life {policy_type_format(policy_type,duration).lower()} policy for this {age} year-old person would cost a \${liability_pv:.2f} lump payment up front.\n'+\
-            f'This policy could be payed for by a lifetime an annuity of \${pmt:.2f} per year or a monthly payment of \${monthly_pmt:.2f}'
-            return cost_str
-
-# Example
 if __name__ == "__main__":
-    print(actu_str([180,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','n','n','n'],250000,20))
+    # Example usage
+    print(actuarial_string([180, 'm', 72, 130, 'n', 'n', 3, 1, 1, 'n', 'n', 'n', 4, 'n', 0, 'n', 'n', 200, 'n', 'n', 'n', 'n', 'n'], 250000, 20, payment_type='Annual'))

@@ -2,56 +2,104 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-def load_data(file_path):
-    """Load dataset from a CSV file."""
+def load_data(file_path: str) -> pd.DataFrame:
+    """
+    Load dataset from a CSV file and return a DataFrame.
+    
+    Parameters:
+    - file_path (str): The path to the CSV file to be loaded.
+    
+    Returns:
+    - DataFrame: The loaded data as a pandas DataFrame.
+    """
     return pd.read_csv(file_path)
 
-def basic_info(df):
-    """Print basic information about the dataset."""
-    print("Dataset Info:")
+def display_basic_info(df: pd.DataFrame):
+    """
+    Print basic information and the first few rows of the DataFrame.
+    
+    Parameters:
+    - df (DataFrame): The pandas DataFrame whose info to print.
+    """
+    print("Dataset Information:")
     print(df.info())
-    print("\nFirst five rows:")
+    print("\nFirst five rows of the dataset:")
     print(df.head())
 
-def summary_statistics(df):
-    """Display summary statistics of the dataset."""
+def display_summary_statistics(df: pd.DataFrame):
+    """
+    Display summary statistics for the DataFrame.
+    
+    Parameters:
+    - df (DataFrame): The pandas DataFrame to summarize.
+    """
     print("\nSummary Statistics:")
     print(df.describe())
 
-def check_missing_values(df):
-    """Check for missing values in the dataset."""
-    print("\nMissing Values:")
-    print(df.isnull().sum())
+def check_and_report_missing_values(df: pd.DataFrame):
+    """
+    Check and print a report of missing values for each column in the DataFrame.
+    
+    Parameters:
+    - df (DataFrame): The pandas DataFrame to check for missing values.
+    """
+    missing_values = df.isnull().sum()
+    print("\nMissing Values in Each Column:")
+    print(missing_values[missing_values > 0])
 
-def visualize_distributions(df):
-    """Generate histograms for numerical features."""
+def plot_feature_distributions(df: pd.DataFrame):
+    """
+    Generate and display histograms for each numerical feature in the DataFrame.
+    
+    Parameters:
+    - df (DataFrame): The pandas DataFrame to visualize.
+    """
     df.hist(figsize=(12, 8), bins=30, edgecolor='black')
-    plt.suptitle("Feature Distributions", fontsize=16)
+    plt.suptitle("Histograms of Feature Distributions", fontsize=16)
     plt.show()
 
-def encode_binary_columns(df):
-    """Convert binary categorical attributes ('m/f', 'y/n') to numerical values."""
+def convert_binary_columns_to_numeric(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Convert binary categorical attributes to numerical {0, 1} format.
+    
+    Parameters:
+    - df (DataFrame): The pandas DataFrame to process.
+    
+    Returns:
+    - DataFrame: The DataFrame with binary columns converted.
+    """
     binary_mappings = {'m': 1, 'f': 0, 'y': 1, 'n': 0}
-    for col in df.select_dtypes(include=['object']).columns:
-        if df[col].nunique() == 2:
-            df[col] = df[col].map(binary_mappings)
+    for column in df.select_dtypes(include=['object']).columns:
+        if df[column].nunique() == 2:
+            df[column] = df[column].map(binary_mappings)
     return df
 
-def correlation_matrix(df):
-    """Display the correlation matrix as a heatmap."""
+def display_correlation_matrix(df: pd.DataFrame):
+    """
+    Display a heatmap of the correlation matrix for the DataFrame.
+    
+    Parameters:
+    - df (DataFrame): The pandas DataFrame to analyze.
+    """
     plt.figure(figsize=(10, 6))
     sns.heatmap(df.corr(), annot=True, cmap='coolwarm', fmt='.2f')
     plt.title("Correlation Matrix")
     plt.show()
 
-def run_eda(file_path):
-    """Run the complete EDA process on a given dataset."""
+def run_eda(file_path: str):
+    """
+    Execute a complete Exploratory Data Analysis (EDA) process on a dataset.
+    
+    Parameters:
+    - file_path (str): The path to the dataset file.
+    """
     df = load_data(file_path)
-    basic_info(df)
-    summary_statistics(df)
-    check_missing_values(df)
-    visualize_distributions(df)
-    correlation_matrix(encode_binary_columns(df))
+    display_basic_info(df)
+    display_summary_statistics(df)
+    check_and_report_missing_values(df)
+    plot_feature_distributions(df)
+    df = convert_binary_columns_to_numeric(df)
+    display_correlation_matrix(df)
 
 if __name__ == "__main__":
     file_path = input("Enter the path to your dataset: ")

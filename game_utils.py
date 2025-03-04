@@ -1,197 +1,160 @@
 import pandas as pd
 import numpy as np
-import streamlit as st
-from actu import life_liability_pv_mu,get_mort_tab,\
-      years_left_mu
-from neural_net import NeuralNet
 from faker import Faker
-from utils import sex_format,risk_num_format
-file_path='data.csv'
+import streamlit as st
 
-def np_to_int(mixed_array):
-    for i,value in enumerate(mixed_array):
+from actu import calculate_life_insurance_liability, get_mortality_table, actuarial_string
+from neural_net import LifeNet
+from utils import format_sex, format_risk_level
+
+FILE_PATH = 'data.csv'
+
+def convert_np_to_integers(array):
+    """Converts elements of a numpy array to integers if possible."""
+    for i, value in enumerate(array):
         try:
-            mixed_array[i]=int(value)
-        except:
+            array[i] = int(value)
+        except ValueError:
             pass
-    return mixed_array
+    return array
 
-def generate_person(avoid_names=[]):
+def generate_individual(avoid_names=None):
+    """Generates a random person's details from the dataset ensuring unique names."""
+    if avoid_names is None:
+        avoid_names = []
+        
     fake = Faker()
-    df = pd.read_csv(file_path, header=0)
-    person=np_to_int(df.iloc[np.random.randint(0,df.shape[0])].to_numpy())
-    while person[0]>79:
-        person=np_to_int(df.iloc[np.random.randint(0,df.shape[0])].to_numpy())
-    if person[2]=='m':
-        name = fake.name_male()
-        while name in avoid_names:
-            name = fake.name_female()
-    else:
+    df = pd.read_csv(FILE_PATH)
+    individual = convert_np_to_integers(df.iloc[np.random.randint(len(df))].to_numpy())
+    
+    # Regenerate if age is over 79
+    while individual[0] > 79:
+        individual = convert_np_to_integers(df.iloc[np.random.randint(len(df))].to_numpy())
+    
+    name = fake.name_male() if individual[2] == 'm' else fake.name_female()
+    while name in avoid_names:
         name = fake.name_female()
-        while name in avoid_names:
-            name = fake.name_female()
-    person = np.append([name],[person])
-    return person
+    
+    return np.append([name], individual)
 
+def generate_multiple_individuals(number):
+    """Generates multiple unique individuals."""
+    individuals = []
+    avoid_names = []
+    for _ in range(number):
+        person = generate_individual(avoid_names)
+        individuals.append(person)
+        avoid_names.append(person[0])
+    return individuals
 
-def generate_people(num_people):
-    people=[]
-    avoid_names=[]
-    for i in range(num_people):
-        people.append(generate_person(avoid_names))
-        avoid_names.append(people[i][0])
-    return people
+def price_individual(individual, interest_rate):
+    """Calculates the price for insuring an individual."""
+    age = individual[1]
+    inputs = individual[2:]
+    mortality_table = get_mortality_table(age, inputs)
+    face_value = 1250
+    return calculate_life_insurance_liability(face_value, interest_rate, mortality_table, 0)
 
-def price_person(person,I):
-    fv=1250
-    person=person[1:]
-    age=person[0]
-    inputs=person[1:]
-    mort_tab=get_mort_tab(age,inputs)
-    return life_liability_pv_mu(fv,I,mort_tab,0)
+def years_remaining(individual):
+    """Estimates years left for an individual based on actuarial data."""
+    age = individual[1]
+    default_years = 25 - age if age < 25 else 0
+    inputs = individual[2:]
+    mortality_table = get_mortality_table(age, inputs)
+    return actuarial_string(mortality_table, default_years)
 
-def get_yrs_left(person):
-    person=person[1:]
-    age=person[0]
-    if age<25:
-        def_yrs=25-age
-    else:
-        def_yrs=0
-    inputs=person[1:]
-    mort_tab=get_mort_tab(age,inputs)
-    return years_left_mu(mort_tab,def_yrs)
+def calculate_years_remaining_for_all(individuals):
+    """Calculates years remaining for all individuals in a list."""
+    return [years_remaining(individual) for individual in individuals]
 
-def get_mus(people):
-    return [get_yrs_left(person) for person in people]
+def price_all_individuals(individuals, interest_rate=1):
+    """Prices insurance for all individuals in a list."""
+    return [price_individual(individual, interest_rate) for individual in individuals]
 
-def price_people(people,I=1):
-    return [price_person(person,I) for person in people]
+def convert_yn_to_verb(yn):
+    """Converts a yes/no value to appropriate verb."""
+    return 'do' if yn == 'y' else 'do not'
 
-def yn_to_does_not(yn):
-    if yn=='y':
-        return 'do'
-    else:
-        return 'do not'
+def convert_yn_to_boolean(yn):
+    """Converts a yes/no value to boolean."""
+    return yn == 'y'
 
-def yn_to_bool(yn):
-    if yn=='y':
-        return True
-    else:
-        return False
+def display_individual_details(individual):
+    """Displays detailed information about an individual using Streamlit."""
+    st.subheader(f'{individual[0]} is...')
+    attributes = {
+        'Age': individual[1],
+        'Weight': individual[2],
+        'Sex': format_sex(individual[3]),
+        'Height': individual[4],
+        'Blood Pressure': individual[5],
+        'Cholesterol': individual[19],
+        'Medications': individual[8],
+        'Occupational Hazard': format_risk_level(individual[9]).lower(),
+        'Lifestyle Hazard': format_risk_level(individual[10]).lower(),
+        'Major Surgeries': individual[16],
+        'Drinks per Week': individual[14],
+    }
+    for key, value in attributes.items():
+        st.markdown(f'**{key}:** {value}')
 
-def print_person(person):
-    st.subheader(person[0] + ' is...')
-    st.markdown('**'+ str(person[1])+'** years old')
-    st.markdown('**' + str(person[2]) + '** pounds')
-    st.markdown('**' + sex_format(person[3])+'**')
-    st.markdown('**' + str(person[4]) + "** inches tall")
-    st.markdown('Their blood pressure is **' + str(person[5])+'**')
-    st.markdown('Their cholesterol is **' + str(person[19])+'**')
-    st.markdown('They are on **' + str(person[8])+ '** medications')
-    st.markdown('Their occupation harzard is **' + risk_num_format(person[9]).lower()+'**')
-    st.markdown('Their lifestyle harzard is **' + risk_num_format(person[10]).lower()+'**')
-    st.markdown('They have had **' + str(person[16])+ '** major surgeries')
-    st.markdown('They have **' + str(person[14])+ '** drinks per week')
-    if yn_to_bool(person[6]):
-        st.markdown('They **smoke**')
-    if yn_to_bool(person[7]):
-        st.markdown('They use alternative forms of nicotine (like vaping or chewing tobacco)')
-    if yn_to_bool(person[11]):
-        st.markdown('They use **weed**')
-    if yn_to_bool(person[12]):
-        st.markdown('They use **opioids**')
-    if yn_to_bool(person[13]):
-        st.markdown('They use recreational drugs (besides alcohol, nicotine, weed, or opioids)')
-    if yn_to_bool(person[15]):
-        st.markdown('They have a history of **addiction**')
-    if yn_to_bool(person[17]):
-        st.markdown('They **' + yn_to_does_not(person[17])+ '** have diabetes')
-    if yn_to_bool(person[18]):
-        st.markdown('They have a **history of heart disease or stroke**')
-    if yn_to_bool(person[20]):
-        st.markdown('They have **asthma**')
-    if yn_to_bool(person[21]):
-        st.markdown('They have an **immune deficiency**')
-    if yn_to_bool(person[22]):
-        st.markdown('They have a **family history of cancer**')
-    if yn_to_bool(person[23]):
-        st.markdown('They have a *family history of heart disease or stroke*')
-    if yn_to_bool(person[24]):
-        st.markdown('They have a *family history of high cholesterol*')
+    # Additional health details
+    health_details = [
+        (6, 'They **smoke**'),
+        (7, 'They use alternative forms of nicotine (like vaping or chewing tobacco)'),
+        (11, 'They use **weed**'),
+        (12, 'They use **opioids**'),
+        (13, 'They use recreational drugs (besides alcohol, nicotine, weed, or opioids)'),
+        (15, 'They have a history of **addiction**'),
+        (17, f'They **{convert_yn_to_verb(individual[17])}** have diabetes'),
+        (18, 'They have a **history of heart disease or stroke**'),
+        (20, 'They have **asthma**'),
+        (21, 'They have an **immune deficiency**'),
+        (22, 'They have a **family history of cancer**'),
+        (23, 'They have a **family history of heart disease or stroke**'),
+        (24, 'They have a **family history of high cholesterol**'),
+    ]
 
-def print_people(people):
-    columns = st.columns(len(people),border=True,gap='medium')
-    for i,col in enumerate(columns):
+    for index, message in health_details:
+        if convert_yn_to_boolean(individual[index]):
+            st.markdown(message)
+
+def display_individuals_in_columns(individuals):
+    """Display individuals' details in Streamlit columns."""
+    columns = st.columns(len(individuals))
+    for col, individual in zip(columns, individuals):
         with col:
-            print_person(people[i])
+            display_individual_details(individual)
 
-def dp_print_header():
-    score=st.session_state['score']
+def setup_individuals(difficulty):
+    """Initial setup for generating and displaying individuals based on difficulty settings."""
+    num_people = np.random.randint(1, 4)
+    st.set_page_config(layout='wide' if num_people > 2 else 'centered')
+    
+    individuals = generate_multiple_individuals(num_people)
+    remaining_years = calculate_years_remaining_for_all(individuals)
+    
+    # Ensure significant age gaps
+    while any(abs(ry1 - ry2) < difficulty or abs(ry1 - ry2) > (difficulty + 10) for ry1 in remaining_years for ry2 in remaining_years if ry1 != ry2):
+        individuals = generate_multiple_individuals(num_people)
+        remaining_years = calculate_years_remaining_for_all(individuals)
+    
+    prices = price_all_individuals(individuals)
+    print(prices)  # Display prices for debug purposes
+
+    return individuals, remaining_years, prices
+
+def play_game():
+    """Streamlit app to play a guessing game about individuals' longevity."""
     st.title('Death Predictor Game')
-    st.subheader('Who (statistically) has the longest left to live?')
-    st.markdown('Guess correctly to gain points, guess wrongly to lose points')
-    st.subheader(f'*Current Score:\t{round(score)}*')
-    return score
-
-def update_score(mus,amount,age):
-    st.session_state['guessed']=True
-    score = st.session_state['score']
-    if age==max(mus):
-        st.session_state['score']=score+amount
-    else:
-        st.session_state['score']=score-amount
-
-def check_age_gap(mus,difficulty):
-    for i,age1 in enumerate(mus):
-        for age2 in mus[i+1:]:
-            if abs(age1-age2)<difficulty or abs(age1-age2)>(difficulty+10):
-                return True
-    return False
-
-def people_setup(difficulty):
-    if st.session_state['people/prices/mu'] is not None:
-        people=st.session_state["people/prices/mu"][0]
-        prices=st.session_state["people/prices/mu"][1]
-        mus=st.session_state["people/prices/mu"][2]
-        if len(people)>2:
-            st.set_page_config(layout='wide')
-        else:
-            st.set_page_config(layout='centered')
-        return people,mus,prices
-    num_people=np.random.randint(1,4)
-    if num_people>2:
-        st.set_page_config(layout='wide')
-    else:
-        st.set_page_config(layout='centered')
-    people=generate_people(num_people)
-    # Calculate how much each of them would cost for a life insurance policy
-    mus=get_mus(people)
-    # Ensure they are separate enough
-    while check_age_gap(mus,difficulty):#Maybe this value can be a difficulty setting
-        people=generate_people(num_people)
-        mus=get_mus(people)
-    prices=price_people(people,1)
-    print(prices)
-    # Then save
-    st.session_state["people/prices/mu"]=[people,prices,mus]
-    return people,mus,prices
-
-def mu_comparison(mus):
-    mu_str=f'{mus[0]:.1f}'
-    while len(mus)>1:
-        mus=mus[1:]
-        mu_str+=f' vs {mus[0]:.1f}'
-    st.text('Remaining Life Expectancies of:')
-    st.text(mu_str)
-
-def guess_button(person_index,update_function,people,mus,prices):
-    if st.button(people[person_index][0],key=f'person{person_index}',on_click=update_function,disabled=st.session_state['guessed']):
-        if mus[person_index] is max(mus):
-            st.subheader('Correct!')
-            mu_comparison(mus)
-            st.text(f'Plus {round(prices[person_index])} points')
-        else:
-            st.subheader('Wrong!')
-            mu_comparison(mus)
-            print(prices[0])
-            st.text(f'Minus {round(prices[person_index])} points')
+    difficulty = st.sidebar.selectbox('Select Difficulty:', [10, 20, 30], index=1)
+    individuals, remaining_years, prices = setup_individuals(difficulty)
+    guessed = st.session_state.get('guessed', False)
+    
+    for i, individual in enumerate(individuals):
+        if st.button(individual[0], key=f'person{i}', on_click=lambda: play_game(remaining_years, prices[i], i), disabled=guessed):
+            correct = remaining_years[i] == max(remaining_years)
+            st.subheader('Correct!' if correct else 'Wrong!')
+            for year, price in zip(remaining_years, prices):
+                st.text(f'{year:.1f} years: {"+" if correct else "-"}{round(price)} points')
+            st.session_state['guessed'] = True
