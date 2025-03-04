@@ -58,7 +58,7 @@ def get_yrs_left(person):
     else:
         def_yrs=0
     inputs=person[1:]
-    mort_tab=get_mort_tab(age,inputs)
+    mort_tab=get_mort_tab(age,inputs,False)
     return years_left_mu(mort_tab,def_yrs)
 
 def get_mus(people):
@@ -197,4 +197,9 @@ def guess_button(person_index,update_function,people,mus,prices):
             st.text(f'Minus {round(prices[person_index])} points')
 
 if __name__ == '__main__':
+    print(get_yrs_left(['',25,160,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','y','y','y']))
     print(get_yrs_left(['',26,160,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','y','y','y']))
+    print(get_yrs_left(['',27,160,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','y','y','y']))
+    print(get_yrs_left(['',28,160,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','y','y','y']))
+    print(get_yrs_left(['',29,160,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','y','y','y']))
+    print(get_yrs_left(['',30,160,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','y','y','y']))

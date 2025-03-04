@@ -125,7 +125,10 @@ class NeuralNet(nn.Module):
             reps: Number loops of training/eval
             epoch: Number of trainings between evals
         '''
-        X_train, y_train, self.scaler, self.cols = load_prep_data('data.csv',25+(96-self.fc2.out_features),test=False)
+        X_train, y_train, self.scaler, self.cols = load_prep_data(25+(96-self.fc2.out_features),test=False)
+        print(f'Len X_train: {len(X_train)}')
+        print(0.007*((10000/len(X_train))**(.1)))
+        self.optimizer = optim.Adam(self.parameters(), lr=0.007*((10000/len(X_train))**(.5)))# Adjust learning speed using training data size
         train_dataset = TensorDataset(X_train, y_train)
         train_loader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True)
         for i in range(reps):

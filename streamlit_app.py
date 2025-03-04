@@ -17,5 +17,7 @@ if 'score' not in st.session_state:
     st.session_state['score']=0
 if 'guessed' not in st.session_state:
     st.session_state['guessed']=False
+if 'check_options' not in st.session_state:
+    st.session_state['check_options']=False
 
 pg.run()

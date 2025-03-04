@@ -12,16 +12,11 @@ def convert_to_binary(value):
     """Converts 'm' or 'y' to 1, otherwise returns 0."""
     return 1 if str(value).lower() in ["m", "y"] else 0
 
-def load_prep_data(file_path,age,test=True):
-    '''Loads and preps data...
-    Args:
-        file_path (str):...
-    Returns:
-        X (array of arrays)
-        y (array of arrays)
-    '''
-    # Load CSV file
-    df = pd.read_csv(file_path, header=0)
+def load_data():
+    df = pd.read_csv('data.csv', header=0)
+    return df
+
+def prep_data(df, age,test=True):
     df = df[df['age'] >= age]
 
     # Extract target (y) and features (X)
@@ -54,6 +49,18 @@ def load_prep_data(file_path,age,test=True):
         return X_train, X_test, y_train, y_test, scaler, input_cols
     else:
         return X_tensor,y_tensor,scaler,input_cols
+
+def load_prep_data(age,test=True):
+    '''Loads and preps data...
+    Args:
+        file_path (str):...
+    Returns:
+        X (array of arrays)
+        y (array of arrays)
+    '''
+    # Load CSV file
+    df=load_data()
+    return prep_data(df,age,test)
 
 def load_fold_data(file_path):
     '''Loads and preps data...
