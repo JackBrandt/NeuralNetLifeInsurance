@@ -16,7 +16,7 @@ def load_data():
     df = pd.read_csv('data.csv', header=0)
     return df
 
-def prep_data(df, age,test=True):
+def prep_data(df, age,test=True,sigma=10):
     df = df[df['age'] >= age]
 
     # Extract target (y) and features (X)
@@ -25,7 +25,9 @@ def prep_data(df, age,test=True):
     y_vals=[value-age for value in y_vals]
     y=[empty.copy() for _ in y_vals]
     for i,y_val in enumerate(y_vals):
-        y[i][y_val]=1
+        y[i][y_val]=1.0
+        y[i]=gaussian_filter1d(y[i],sigma)
+        #print(y[i])
     #print(y_vals[0])
     #print(y[0][72])
     X = df.iloc[:, 1:].copy()  # Everything else is features
@@ -239,3 +241,5 @@ def st_get_inputs():
             pass
     return inputs
 
+if __name__ == '__main__':
+    load_prep_data(25,False)

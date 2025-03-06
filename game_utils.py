@@ -58,7 +58,7 @@ def get_yrs_left(person):
     else:
         def_yrs=0
     inputs=person[1:]
-    mort_tab=get_mort_tab(age,inputs,False)
+    mort_tab=get_mort_tab(age,inputs,50)
     return years_left_mu(mort_tab,def_yrs)
 
 def get_mus(people):

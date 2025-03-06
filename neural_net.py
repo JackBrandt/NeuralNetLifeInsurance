@@ -35,7 +35,7 @@ class NeuralNet(nn.Module):
         self.fc2 = nn.Linear(10, int(96-(age-25))) # Output layer with 95 neurons
         self.relu = nn.ReLU()
         self.softmax = nn.Softmax(dim=1)  # Apply softmax for multi-class classification
-        self.optimizer = optim.Adam(self.parameters(), lr=0.005)
+        self.optimizer = optim.Adam(self.parameters(), lr=0.001)
         self.criterion = nn.CrossEntropyLoss()  # Use for classification
         self.batch_size = 32
         self.scaler = StandardScaler()
@@ -127,15 +127,15 @@ class NeuralNet(nn.Module):
         '''
         X_train, y_train, self.scaler, self.cols = load_prep_data(25+(96-self.fc2.out_features),test=False)
         print(f'Len X_train: {len(X_train)}')
-        print(0.007*((10000/len(X_train))**(.1)))
-        self.optimizer = optim.Adam(self.parameters(), lr=0.007*((10000/len(X_train))**(.5)))# Adjust learning speed using training data size
+        print(0.001*((10000/len(X_train))**(.1)))
+        self.optimizer = optim.Adam(self.parameters(), lr=0.001*((10000/len(X_train))**(.5)))# Adjust learning speed using training data size
         train_dataset = TensorDataset(X_train, y_train)
         train_loader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True)
         for i in range(reps):
             self.neural_net_train(train_loader,epoch)#Change epoch to do more training between evals
             self.save_model()
 
-    def get_life_data(self, inputs=None, is_tensor=False,smooth=False,sigma=5):
+    def get_life_data(self, inputs=None, is_tensor=False,smooth_percentage=0,sigma=5):
         if inputs is None:
             # Get inputs
             inputs=get_life_inputs()
@@ -156,8 +156,9 @@ class NeuralNet(nn.Module):
         output = output.transpose()
         output.index=[str(i) for i in range(25+(96-self.fc2.out_features),121)]
         #output.to_csv()
-        if smooth:
-            return gaussian_smooth(output,sigma)
+        if smooth_percentage>0:
+            smooth_percentage=smooth_percentage/100
+            return smooth_percentage*gaussian_smooth(output,sigma)+(1-smooth_percentage)*output
         else:
             return output
 
@@ -183,7 +184,7 @@ def make_all_models(age_cap: int):
     """
     for age in range(25,age_cap):
         model=NeuralNet(age)
-        model.train_save(1,1)
+        model.train_save(2,1)
 
 if __name__ == "__main__":
     from utils import plot_mort
@@ -192,7 +193,7 @@ if __name__ == "__main__":
     mort_df=model.get_life_data([[180,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','n','n','n']])
     plot_mort(mort_df)
     print(mort_df)
-    smoothed_df = gaussian_smooth(mort_df, sigma=10)
+    smoothed_df = mort_df=model.get_life_data([[180,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','n','n','n']],smooth_percentage=100,)
     #print(smoothed_df.sum())
     plot_mort(smoothed_df)
     #print(smoothed_df)

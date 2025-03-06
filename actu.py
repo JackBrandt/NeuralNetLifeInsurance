@@ -1,7 +1,7 @@
 from neural_net import load_model, NeuralNet
 from utils import policy_type_format
 
-def get_mort_tab(age,inputs,smooth=True):
+def get_mort_tab(age,inputs,smooth=100):
     if age<25:
         def_years=25-age
     else:
