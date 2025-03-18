@@ -4,7 +4,7 @@ options:
 steps:
 - name: 'gcr.io/cloud-builders/docker'
   dir: '.devcontainer'  # Important: specify directory
-  args: ['build', '-t', 'gcr.io/$snappy-rainfall-454116-t5/streamlit-app', '.']
+  args: ['build', '-t', 'gcr.io/snappy-rainfall-454116-t5/streamlit-app', '.']
 
 # Deploy to Cloud Run
 - name: 'gcr.io/cloud-builders/gcloud'
