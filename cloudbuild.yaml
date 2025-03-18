@@ -3,7 +3,7 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: [
     'build',
-    '-t', 'gcr.io/$PROJECT_ID/your-image-name',
+    '-t', 'gcr.io/$PROJECT_ID/streamlit-app',
     '-f', '.devcontainer/Dockerfile',  # Add this line
     '.'
   ]
