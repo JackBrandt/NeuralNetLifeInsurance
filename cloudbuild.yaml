@@ -23,4 +23,4 @@ steps:
     - '8501'
 
 images:
-  - 'gcr.io/$snappy-rainfall-454116-t5/streamlit-app'
+  - 'gcr.io/snappy-rainfall-454116-t5/streamlit-app'
