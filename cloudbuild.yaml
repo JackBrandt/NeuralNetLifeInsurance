@@ -4,7 +4,7 @@ options:
 steps:
 - name: 'gcr.io/cloud-builders/docker'
   dir: '.devcontainer'  # Important: specify directory
-  args: ['build', '-t', 'gcr.io/$neuralnetlife/streamlit-app', '.']
+  args: ['build', '-t', 'gcr.io/$snappy-rainfall-454116-t5/streamlit-app', '.']
 
 # Deploy to Cloud Run
 - name: 'gcr.io/cloud-builders/gcloud'
@@ -13,7 +13,7 @@ steps:
     - 'deploy'
     - 'streamlit-app'
     - '--image'
-    - 'gcr.io/$PROJECT_ID/streamlit-app'
+    - 'gcr.io/$snappy-rainfall-454116-t5/streamlit-app'
     - '--region'
     - 'us-central1'
     - '--platform'
@@ -23,4 +23,4 @@ steps:
     - '8501'
 
 images:
-  - 'gcr.io/$PROJECT_ID/streamlit-app'
+  - 'gcr.io/$snappy-rainfall-454116-t5/streamlit-app'
