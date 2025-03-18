@@ -1,4 +1,7 @@
 from neural_net import load_model, NeuralNet
+from google.cloud import storage
+import torch
+
 def payout_pv(fv, n, i):
     '''Calculates the present value of a payment in n years at a given interest rate
     Args:
@@ -151,6 +154,61 @@ def actu_str(inputs,fv,age,payment_type=None):
             f'This policy could be payed for by a lifetime fixed annuity of \${fixed_pmt:.2f} per year or a fixed monthly payment of \${monthly_pmt:.2f}'
             return cost_str
 
+def actu_str_gcs(inputs, fv, age, payment_type=None, model_bucket='life-predictor-cpsc325-trained-models'):
+    '''Returns a string with information about insurance for an individual
+    Args:
+        inputs: the paramaters for the neural net prediction
+        fv: How much you want the policy to payout
+        age: Age of the individual
+        payment_type: The payment type (e.g., Lump, Annual, Monthly)
+    Returns:
+        Str
+    '''
+    def_years = 0
+    if age < 25:
+        def_years = 25 - age
+    model_path = f"models/{age}.pth"
+    
+    # Download the model from Google Cloud Storage
+    client = storage.Client()
+    bucket = client.bucket(model_bucket)
+    blob = bucket.blob(model_path)
+    
+    # Check if the model exists in GCS
+    if not blob.exists():
+        raise FileNotFoundError(f"Model for age {age} not found in GCS.")
+    
+    # Download the model to the temporary local path
+    temp_model_path = "/tmp/model.pth"
+    blob.download_to_filename(temp_model_path)
+    
+    # Load the model into memory
+    model = load_model(temp_model_path, age)  # Use the updated load_model function
+    
+    # Process the inputs through the model
+    print(inputs)
+    mort_df = model.get_life_data([inputs], False, True, sigma=10)
+    mort_tab = mort_df[0].to_numpy()
+    
+    # Depending on payment_type, calculate the insurance cost
+    match payment_type:
+        case 'Lump':
+            liability_pv = life_liability_pv_mu(fv, 1, mort_tab, def_years)
+            return f'\${liability_pv:.2f}.'
+        case 'Annual':
+            fixed_pmt = life_pmt_mu(fv, 1, mort_tab, def_years)
+            return f'\${fixed_pmt:.2f}.'
+        case 'Monthly':
+            fixed_pmt = life_pmt_mu(fv, 1, mort_tab, def_years)
+            fixed_pmt = annual_to_monthly_pmt(fixed_pmt, 1)
+            return f'\${fixed_pmt:.2f}.'
+
 # Example
 if __name__ == "__main__":
-    print(actu_str([180,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','n','n','n'],250000,20))
+    inputs = [180, 'm', 72, 120, 'n', 'n', 2, 1, 2, 'n', 'n', 'n', 3, 'n', 0, 'n', 'n', 190, 'n', 'n', 'y', 'n', 'y']
+    fv = 150000
+    age = 25
+    payment_type = 'Annual'
+
+    result = actu_str_gcs(inputs, fv, age, payment_type)
+    print(result)

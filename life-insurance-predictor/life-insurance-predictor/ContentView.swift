@@ -290,7 +290,8 @@ struct ContentView: View {
                     
                     // MARK: - Calculate Button
                     Button(action: {
-                        self.resultText = calculateInsurance()
+                        // Call the function that sends data to your Cloud Run API
+                        self.fetchPrediction()
                     }) {
                         Text("Calculate")
                             .font(.headline)
@@ -306,14 +307,13 @@ struct ContentView: View {
                     if !resultText.isEmpty {
                         ZStack {
                             RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.gray.opacity(0.15))  // Faded background
+                                .fill(Color.gray.opacity(0.15))
                                 .shadow(radius: 2)
                             
                             VStack(spacing: 8) {
-                                Text("Estimated Cost")
+                                Text("Model Prediction")
                                     .font(.headline)
                                     .foregroundColor(.secondary)
-                                
                                 Text(resultText)
                                     .font(.title)
                                     .fontWeight(.bold)
@@ -324,13 +324,110 @@ struct ContentView: View {
                         .frame(maxWidth: .infinity, minHeight: 100)
                         .padding(.vertical, 8)
                     }
-                    
                 }
                 .padding()
             }
             .navigationTitle("Life Insurance Calculator")
         }
     }
+    
+    // MARK: - Networking to fetch prediction from your Cloud Run API
+    func fetchPrediction() {
+        // 1) Replace with the public URL of your Cloud Run service
+        let urlString = ""
+        
+        // 2) Build the 23 feature inputs in the same order your model expects
+        let w = Double(weight) ?? 0.0
+        let h = Double(height) ?? 0.0
+        let bp = Double(sysBP) ?? 0.0
+        let meds = Double(numMeds) ?? 0.0
+        let drWeek = Double(drinksAWeek) ?? 0.0
+        let surgeryNum = Double(majorSurgeryNum) ?? 0.0
+        let chol = Double(cholesterol) ?? 0.0
+        
+        let features: [Any] = [
+            // Make sure the order matches your PyTorch model’s column order:
+            // e.g. [weight, sex, height, sysBP, "n" ...]
+            w,
+            sexOptions[sexIndex],
+            h,
+            bp,
+            ynOptions[smokerIndex],
+            ynOptions[nicOtherIndex],
+            meds,
+            Double(occupDangerIndex + 1), // or you might directly store "3" if that's how your model trained
+            Double(lsDangerIndex + 1),
+            ynOptions[cannabisIndex],
+            ynOptions[opioidsIndex],
+            ynOptions[otherDrugsIndex],
+            drWeek,
+            ynOptions[addictionIndex],
+            surgeryNum,
+            ynOptions[diabetesIndex],
+            ynOptions[hdsIndex],
+            chol,
+            ynOptions[asthmaIndex],
+            ynOptions[immuneDefIndex],
+            ynOptions[familyCancerIndex],
+            ynOptions[familyHeartDiseaseIndex],
+            ynOptions[familyCholesterolIndex]
+        ]
+        
+        let body: [String: Any] = [
+            "age": Int(age),
+            "features": features
+        ]
+        
+        guard let url = URL(string: urlString),
+              let jsonData = try? JSONSerialization.data(withJSONObject: body) else {
+            print("Error: Invalid URL or cannot create JSON.")
+            return
+        }
+        
+        // 3) Create and configure the request
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = jsonData
+        
+        // 4) Send the request
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            
+            // Handle low-level errors (e.g., no connection)
+            if let error = error {
+                print("Network error: \(error.localizedDescription)")
+                return
+            }
+            
+            // Check for response data
+            guard let data = data else {
+                print("No data in response.")
+                return
+            }
+            
+            // 5) Parse the JSON
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                    // Example: {"age": 25, "prediction": [0.0012, 0.0035, ...]}
+                    
+                    let ageReturned = json["age"] as? Int ?? 0
+                    if let predictionArray = json["prediction"] as? [Double] {
+                        // Perhaps display as a string, or do further processing
+                        DispatchQueue.main.async {
+                            self.resultText = "Age: \(ageReturned), prediction: \(predictionArray)"
+                        }
+                    } else {
+                        DispatchQueue.main.async {
+                            self.resultText = "Invalid JSON: 'prediction' not found"
+                        }
+                    }
+                }
+            } catch {
+                print("JSON parse error: \(error)")
+            }
+            
+        }.resume()
+}
     
     // MARK: - Helper Functions
     
@@ -351,35 +448,35 @@ struct ContentView: View {
         }
     }
     
-    func calculateInsurance() -> String {
-        // Convert text fields to floats/doubles
-        let w = Double(weight) ?? 0
-        let h = Double(height) ?? 0
-        let bp = Double(sysBP) ?? 0
-        let meds = Double(numMeds) ?? 0
-        let drWeek = Double(drinksAWeek) ?? 0
-        let surgeryNum = Double(majorSurgeryNum) ?? 0
-        let chol = Double(cholesterol) ?? 0
-        
-        // Example numeric encoding of pickers
-        let sexVal = sexIndex == 0 ? 0.0 : 1.0
-        let smokeVal = smokerIndex == 0 ? 1.0 : 0.0
-        // etc. for other indexes...
-        
-        // Simple example logic
-        let baseRisk = (w + h + bp + meds + drWeek + surgeryNum + chol) / 1000.0
-        let ageFactor = age * 0.01
-        let randomAdjustment = Double.random(in: -0.1...0.1)
-        
-        let finalRisk = baseRisk + ageFactor + randomAdjustment
-        
-        let payType = paymentOptions[paymentIndex]
-        let policy = policyAmount
-        
-        let costEstimate = policy * finalRisk * 0.01  // dummy formula
-        
-        return String(format: "$%.2f", costEstimate)
-    }
+//    func calculateInsurance() -> String {
+//        // Convert text fields to floats/doubles
+//        let w = Double(weight) ?? 0
+//        let h = Double(height) ?? 0
+//        let bp = Double(sysBP) ?? 0
+//        let meds = Double(numMeds) ?? 0
+//        let drWeek = Double(drinksAWeek) ?? 0
+//        let surgeryNum = Double(majorSurgeryNum) ?? 0
+//        let chol = Double(cholesterol) ?? 0
+//        
+//        // Example numeric encoding of pickers
+//        let sexVal = sexIndex == 0 ? 0.0 : 1.0
+//        let smokeVal = smokerIndex == 0 ? 1.0 : 0.0
+//        // etc. for other indexes...
+//        
+//        // Simple example logic
+//        let baseRisk = (w + h + bp + meds + drWeek + surgeryNum + chol) / 1000.0
+//        let ageFactor = age * 0.01
+//        let randomAdjustment = Double.random(in: -0.1...0.1)
+//        
+//        let finalRisk = baseRisk + ageFactor + randomAdjustment
+//        
+//        let payType = paymentOptions[paymentIndex]
+//        let policy = policyAmount
+//        
+//        let costEstimate = policy * finalRisk * 0.01  // dummy formula
+//        
+//        return String(format: "$%.2f", costEstimate)
+//    }
 }
 
 struct ContentView_Previews: PreviewProvider {

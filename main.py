@@ -1,56 +1,40 @@
-import streamlit as st
-from actu import actu_str
-from neural_net import NeuralNet
-from utils import sex_format,yn_format,risk_num_format
-# Title
-st.title("Death Predictors: Neural Network Life Insurance Calculator")
+from google.cloud import storage
+from actu import actu_str_gcs  
 
-# Main stuff
-# TODO: Replace text_input with number_input with sensible parameters (e.g., height should be positive)
-st.write("Please enter your personal info and risk factors below to get started")
-weight = st.text_input("Weight(lbs): ")
-sex = st.pills("Sex:", ['m','f'],key='sex', selection_mode="single", format_func=sex_format, label_visibility="visible")
-height = st.text_input("Height(in): ")
-sys_bp = st.text_input("Sys_BP: ")
-smoker = st.pills("Do you smoke:", ['y','n'],key='smoke', selection_mode="single", format_func=yn_format, label_visibility="visible")
-nic_other = st.pills("Do you use other forms of nicotine? (e.g., vape or chewing tobacco):", ['y','n'],key='nic', selection_mode="single", format_func=yn_format, label_visibility="visible")
-num_meds = st.text_input("Number of medications: ")
-occup_danger = st.pills("How would you describe your occupational danger? (Example: Underwater welding -> High, Office work -> Low)", [1,2,3],key='occupy', selection_mode="single", format_func=risk_num_format, label_visibility="visible")
-ls_danger = st.pills("How would you describe your lifestyle danger? (Example: Frequent skydiving -> High, )", [1,2,3],key='ls', selection_mode="single", format_func=risk_num_format, label_visibility="visible")
-cannabis = st.pills("Do you use cannabis, weed, or pot?", ['y','n'],key='weed', selection_mode="single", format_func=yn_format, label_visibility="visible")
-opioids = st.pills("Do you use opioids?", ['y','n'],key='opioids', selection_mode="single", format_func=yn_format, label_visibility="visible")
-other_drugs = st.pills("Do you use any other drugs:", ['y','n'],key='drugs', selection_mode="single", format_func=yn_format, label_visibility="visible")
-drinks_aweek = st.text_input("Drinks per week: ")
-addiction = st.pills("Do you have a history of addiction?", ['y','n'],key='addict', selection_mode="single", format_func=yn_format, label_visibility="visible")
-major_surgery_num = st.text_input("Number of major surgeries: ")
-diabetes = st.pills("Do you have diabetes?", ['y','n'],key='diab', selection_mode="single", format_func=yn_format, label_visibility="visible")
-hds = st.pills("Do you have a history of heart disease or stroke?", ['y','n'],key='hds', selection_mode="single", format_func=yn_format, label_visibility="visible")
-cholesterol = st.text_input("Cholesterol: ")
-asthma = st.pills("Do you have asthma?", ['y','n'], selection_mode="single",key='asthma', format_func=yn_format, label_visibility="visible")
-immune_defic = st.pills("Do you have an immune deficiency?", ['y','n'],key='immune', selection_mode="single", format_func=yn_format, label_visibility="visible")
-family_cancer = st.pills("Do you have a family history of cancer?", ['y','n'],key='cancer', selection_mode="single", format_func=yn_format, label_visibility="visible")
-family_heart_disease = st.pills("Do you have a family history of heart disease or stroke?", ['y','n'], key='familyhds',selection_mode="single", format_func=yn_format, label_visibility="visible")
-family_cholesterol = st.pills("Do you have a family history of high cholesterol?", ['y','n'],key='chol', selection_mode="single", format_func=yn_format, label_visibility="visible")
-inputs = [
-    weight, sex, height, sys_bp, smoker, nic_other, num_meds, occup_danger,
-    ls_danger, cannabis, opioids, other_drugs, drinks_aweek, addiction,
-    major_surgery_num, diabetes, hds, cholesterol, asthma, immune_defic,
-    family_cancer, family_heart_disease, family_cholesterol
-]
-for i,input in enumerate(inputs):
+def calculate_insurance(request):
+    """Google Cloud Function to calculate insurance cost."""
     try:
-        inputs[i]=float(input)
-    except:
-        pass
-age=st.number_input('What\'s your current age?',max_value=79,value=25,min_value=0)
+        # Parse the incoming JSON data
+        data = request.get_json()
 
-#st.write(f"You entered: {inputs}")
+        # Extract inputs and other parameters
+        inputs_data = data.get("inputs", {})
+        age = data.get("age")
+        policy_amount = data.get("policy_amount")
+        payment_type = data.get("payment_type")
 
-# Interactive Components
-st.write('After you enter your personal information, enter policy amount, and payment type, then click the button to calculate your expected insurance cost')
-fv=st.number_input("Policy Amount",125000)
+        # Validate inputs
+        if not age or not policy_amount or not payment_type or not inputs_data:
+            return {"error": "Missing 'age', 'policy_amount', 'payment_type', or 'inputs' in the request"}, 400
 
-payment_type=st.pills("Payment Type", ['Lump','Annual','Monthly','Compare Options'], selection_mode="single", label_visibility="visible")
+        # Prepare the inputs list
+        inputs = [
+            inputs_data['weight'], inputs_data['sex'], inputs_data['height'], inputs_data['sys_bp'],
+            inputs_data['smoker'], inputs_data['nic_other'], inputs_data['num_meds'], inputs_data['occup_danger'],
+            inputs_data['ls_danger'], inputs_data['cannabis'], inputs_data['opioids'], inputs_data['other_drugs'],
+            inputs_data['drinks_aweek'], inputs_data['addiction'], inputs_data['major_surgery_num'],
+            inputs_data['diabetes'], inputs_data['hds'], inputs_data['cholesterol'], inputs_data['asthma'],
+            inputs_data['immune_defic'], inputs_data['family_cancer'], inputs_data['family_heart_disease'],
+            inputs_data['family_cholesterol']
+        ]
 
-if st.button("Click me"):
-    st.write(actu_str(inputs,fv,age,payment_type))
+        # Call your existing actu_str_gcs function
+        result = actu_str_gcs(inputs, policy_amount, age, payment_type)
+
+        # Return the result as a JSON response
+        return {"result": result}, 200
+
+    except FileNotFoundError as e:
+        return {"error": str(e)}, 404
+    except Exception as e:
+        return {"error": str(e)}, 500
