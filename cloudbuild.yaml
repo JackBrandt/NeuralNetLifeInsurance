@@ -6,21 +6,21 @@ steps:
   dir: '.devcontainer'  # Important: specify directory
   args: ['build', '-t', 'gcr.io/$neuralnetlife/streamlit-app', '.']
 
-  # Deploy to Cloud Run
-  - name: 'gcr.io/cloud-builders/gcloud'
-    args:
-      - 'run'
-      - 'deploy'
-      - 'streamlit-app'
-      - '--image'
-      - 'gcr.io/$PROJECT_ID/streamlit-app'
-      - '--region'
-      - 'us-central1'
-      - '--platform'
-      - 'managed'
-      - '--allow-unauthenticated'
-      - '--port'
-      - '8501'
+# Deploy to Cloud Run
+- name: 'gcr.io/cloud-builders/gcloud'
+  args:
+    - 'run'
+    - 'deploy'
+    - 'streamlit-app'
+    - '--image'
+    - 'gcr.io/$PROJECT_ID/streamlit-app'
+    - '--region'
+    - 'us-central1'
+    - '--platform'
+    - 'managed'
+    - '--allow-unauthenticated'
+    - '--port'
+    - '8501'
 
 images:
-  - 'gcr.io/$neuralnetlife/streamlit-app'
+  - 'gcr.io/$PROJECT_ID/streamlit-app'
