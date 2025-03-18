@@ -2,6 +2,11 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/anaconda
 {
 	"name": "Anaconda (Python 3)",
+	"features": {
+	  "docker-from-docker": {} // Uses host's Docker (recommended)
+	  // OR
+	  // "docker-in-docker": {} // Creates a nested Docker environment
+	},
 	"build": {
 		"context": "..",
 		"dockerfile": "Dockerfile"
