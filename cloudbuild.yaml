@@ -1,3 +1,6 @@
+options:
+  logging: CLOUD_LOGGING_ONLY  # Or NONE (not recommended)
+
 steps:
 - name: 'gcr.io/cloud-builders/docker'
   dir: '.devcontainer'  # Important: specify directory
