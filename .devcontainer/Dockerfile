@@ -8,6 +8,9 @@ COPY requirements.txt ./
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy ALL application files
+COPY . .
+
 RUN if [ -f "/tmp/conda-tmp/environment.yml" ]; then umask 0002 && /opt/conda/bin/conda env update -n base -f /tmp/conda-tmp/environment.yml; fi \
     && rm -rf /tmp/conda-tmp
 
