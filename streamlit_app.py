@@ -1,14 +1,6 @@
 import streamlit as st
 from neural_net import NeuralNet
 
-if not st.experimental_user.is_logged_in:
-    if st.button("Log in"):
-        st.login()
-else:
-    if st.button("Log out"):
-        st.logout()
-    st.write(f"Hello, {st.experimental_user.name}!")
-
 life_insurance = st.Page("life_insurance_calculator.py", title="Neural Net Life Cost Predictor", icon='🧮')
 life_predictor = st.Page('life_predictor.py',title='Life Predictor', icon='🧮')
 death_predictor = st.Page("death_predictor.py",title="Death Predictor Game",icon='🎮')
