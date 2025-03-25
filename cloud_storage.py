@@ -65,6 +65,29 @@ class bucket_csv_object():
                 writer.writerows(new_content)
                 self.refresh_file()
 
+def load_user_data(email):
+    bucket=bucket_csv_object()
+    user_data=bucket.read_by_key(email)
+    if user_data==None:
+        user_data=[email]
+        bucket.write_row(user_data)
+    return user_data
+
+def unload_user_data(user_data):
+    bucket=bucket_csv_object()
+    bucket.write_row(user_data)
+    user_data=None
+
+def write_user_data(updated_data):
+    bucket=bucket_csv_object()
+    bucket.write_row(updated_data)
+
+def update_user_data_item(email,item_index,item):
+    user_data=load_user_data(email)[0]
+    user_data[item_index]=item
+    write_user_data(user_data)
+    return user_data
+
 if __name__ == '__main__':
     bucket=bucket_csv_object()
     print(bucket.read_all())
