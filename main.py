@@ -38,3 +38,38 @@ def calculate_insurance(request):
         return {"error": str(e)}, 404
     except Exception as e:
         return {"error": str(e)}, 500
+    
+'''
+curl -X POST https://us-central1-life-predictor-cpsc325.cloudfunctions.net/calculate_insurance \
+  -H "Content-Type: application/json" \
+  -d '{
+    "age": 67,
+    "policy_amount": 150000,
+    "payment_type": "Annual",
+    "inputs": {
+        "weight": 180,
+        "sex": "m",
+        "height": 72,
+        "sys_bp": 120,
+        "smoker": "n",
+        "nic_other": "n",
+        "num_meds": 2,
+        "occup_danger": 1,
+        "ls_danger": 2,
+        "cannabis": "n",
+        "opioids": "n",
+        "other_drugs": "n",
+        "drinks_aweek": 3,
+        "addiction": "n",
+        "major_surgery_num": 0,
+        "diabetes": "n",
+        "hds": "n",
+        "cholesterol": 190,
+        "asthma": "n",
+        "immune_defic": "n",
+        "family_cancer": "y",
+        "family_heart_disease": "n",
+        "family_cholesterol": "y"
+    }
+}'
+'''
