@@ -164,3 +164,4 @@ cython_debug/
 # Tony added
 model.path
 mortality.csv
+.streamlit/secrets.toml
