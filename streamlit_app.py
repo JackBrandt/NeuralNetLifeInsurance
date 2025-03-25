@@ -1,5 +1,7 @@
 import streamlit as st
 from neural_net import NeuralNet
+from cloud_storage import load_user_data
+import json
 
 login = st.Page("login.py",title='Neural Net Life Login Page', icon='🏠')
 life_insurance = st.Page("life_insurance_calculator.py", title="Neural Net Life Cost Predictor", icon='🧮')
@@ -18,5 +20,18 @@ if 'guessed' not in st.session_state:
     st.session_state['guessed']=False
 if 'check_options' not in st.session_state:
     st.session_state['check_options']=False
+if st.experimental_user.is_logged_in:
+    if 'prev_user_inputs' not in st.session_state:
+        try:
+            inputs=load_user_data(st.experimental_user.email)[0][1]
+            inputs = inputs.replace("None", "null")
+            inputs = inputs.replace("'", '"')
+            print(inputs)
+            st.session_state['prev_user_inputs']=json.loads(inputs)
+        except:
+            st.session_state['prev_user_inputs']=[None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,]
+else:
+    if 'prev_user_inputs' not in st.session_state:
+        st.session_state['prev_user_inputs']=[None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,]
 
 pg.run()
