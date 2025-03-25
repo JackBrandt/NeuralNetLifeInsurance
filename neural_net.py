@@ -7,6 +7,7 @@ import pandas as pd
 from utils import gaussian_smooth,load_prep_data
 
 from sklearn.preprocessing import StandardScaler
+import io
 from utils import get_life_inputs, convert_to_binary
 
 def load_model(filepath: str, age: int):
@@ -158,6 +159,17 @@ class NeuralNet(nn.Module):
             return gaussian_smooth(output, sigma)
         else:
             return output
+        
+def load_model_from_bytes(model_bytes, age):
+    """
+    Load a PyTorch model from bytes and set it to evaluation mode.
+    """
+    # Create a file-like object from bytes
+    buffer = io.BytesIO(model_bytes)
+    
+    model = NeuralNet(age) 
+    model.load_state_dict(torch.load(buffer))
+    return model
 
 def make_all_models(age_cap: int):
     """

@@ -1,5 +1,6 @@
-from neural_net import load_model, NeuralNet
+from neural_net import load_model, NeuralNet, load_model_from_bytes
 from google.cloud import storage
+import io
 import torch
 
 def payout_pv(fv, n, i):
@@ -178,15 +179,17 @@ def actu_str_gcs(inputs, fv, age, payment_type=None, model_bucket='life-predicto
     if not blob.exists():
         raise FileNotFoundError(f"Model for age {age} not found in GCS.")
     
-    # Download the model to the temporary local path
-    temp_model_path = "/tmp/model.pth"
-    blob.download_to_filename(temp_model_path)
+    # Load the model directly from bytes
+    model_bytes = blob.download_as_bytes()
+    buffer = io.BytesIO(model_bytes)
+    checkpoint = torch.load(buffer, map_location=torch.device('cpu'))
     
-    # Load the model into memory
-    model = load_model(temp_model_path, age)  # Use the updated load_model function
+    # Initialize the model with the correct architecture
+    model = NeuralNet(age)  
+    model.load_state_dict(checkpoint['state_dict'])
+    model.cols = checkpoint['cols']
     
     # Process the inputs through the model
-    print(inputs)
     mort_df = model.get_life_data([inputs], False, True, sigma=10)
     mort_tab = mort_df[0].to_numpy()
     
@@ -207,7 +210,7 @@ def actu_str_gcs(inputs, fv, age, payment_type=None, model_bucket='life-predicto
 if __name__ == "__main__":
     inputs = [180, 'm', 72, 120, 'n', 'n', 2, 1, 2, 'n', 'n', 'n', 3, 'n', 0, 'n', 'n', 190, 'n', 'n', 'y', 'n', 'y']
     fv = 150000
-    age = 25
+    age = 50
     payment_type = 'Annual'
 
     result = actu_str_gcs(inputs, fv, age, payment_type)
