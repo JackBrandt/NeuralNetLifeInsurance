@@ -7,6 +7,14 @@ st.title("Neural Net Life Cost Predictor")
 # Main stuff
 # TODO: Replace text_input with number_input with sensible parameters (e.g., height should be positive)
 
+if not st.experimental_user.is_logged_in:
+    if st.button("Log in"):
+        st.login()
+else:
+    if st.button("Log out"):
+        st.logout()
+    st.write(f"Hello, {st.experimental_user.name}!")
+
 policy_type=st.pills("Enter Desired Policy Type", ['fl','fd','v'],key='pol_type', selection_mode="single", format_func=policy_type_format, label_visibility="visible")
 age=st.number_input('What\'s your current age?',max_value=79,value=25,min_value= 25 if policy_type=='v' else 0)
 if policy_type=='fd':
