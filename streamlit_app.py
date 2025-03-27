@@ -27,15 +27,21 @@ if 'guessed' not in st.session_state:
 if 'check_options' not in st.session_state:
     st.session_state['check_options']=False
 if 'prev_user_inputs' not in st.session_state or 'high_score' not in st.session_state:
-    user_data=load_user_data(st.experimental_user.email)
     try:
-        st.session_state['prev_user_inputs']=user_data[1]
+        user_data=load_user_data(st.experimental_user.email)
+        try:
+            st.session_state['prev_user_inputs']=user_data[1]
+        except:
+            st.session_state['prev_user_inputs']=[None,None,None,None,None,None,None,None,
+                                                None,None,None,None,None,None,None,None,
+                                                None,None,None,None,None,None,None]
+        try:
+            st.session_state['high_score']=user_data[2]
+        except:
+            st.session_state['high_score']=0
     except:
         st.session_state['prev_user_inputs']=[None,None,None,None,None,None,None,None,
-                                              None,None,None,None,None,None,None,None,
-                                              None,None,None,None,None,None,None]
-    try:
-        st.session_state['high_score']=user_data[2]
-    except:
+                                                None,None,None,None,None,None,None,None,
+                                                None,None,None,None,None,None,None]
         st.session_state['high_score']=0
 pg.run()

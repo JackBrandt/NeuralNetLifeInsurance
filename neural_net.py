@@ -52,7 +52,7 @@ class NeuralNet(nn.Module):
         age=25+96-self.fc2.out_features
         filepath='models/'+str(age)+'.pth'
         torch.save(self, filepath)  # Save model parameters
-        print(f"Model saved to {filepath}")
+        #print(f"Model saved to {filepath}")
 
     # Training loop
     def neural_net_train(self,train_loader, epoch=1, print_statement=True):

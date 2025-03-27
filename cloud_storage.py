@@ -115,7 +115,7 @@ def write_user_data(updated_data):
     bucket.write_row(updated_data)
 
 def update_user_data_item(email,item_index,item):
-    user_data=load_user_data(email)[0]
+    user_data=load_user_data(email)
     user_data[item_index]=item
     write_user_data(user_data)
     return user_data

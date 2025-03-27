@@ -1,11 +1,12 @@
 import streamlit as st
 from game_utils import dp_print_header, update_score,\
     print_people,people_setup,guess_button
+from cloud_storage import update_user_data_item
 from neural_net import NeuralNet
 
 difficulty=1
 people,mus,prices=people_setup(difficulty)
-score = dp_print_header()
+highscore, score = dp_print_header()
 print_people(people)
 
 update_w_price1 = lambda : update_score(mus,prices[0],mus[0])
@@ -15,11 +16,17 @@ update_w_price3 = lambda : update_score(mus,prices[2],mus[2])
 def check_guess():
     points = prices[0]*(1-abs(mu_guess-mus[0])/7.5)
     st.session_state['score']=st.session_state['score']+points
+    print(f'Current score {st.session_state['score']}')
+    print(f'Current highscore: {highscore}')
+    if st.session_state['score']>highscore:
+        print('High score')
+        st.session_state['high_score']=score
+        update_user_data_item(st.experimental_user.email, 2, score)
     st.session_state['guessed']=True
 
 def print_guess_results():
     points = prices[0]*(1-abs(mu_guess-mus[0])/7.5)
-    print(f'points={points}')
+    #print(f'points={points}')
     if points>=0:
         st.subheader('Good job!')
         st.text(f'Correct answer was: {mus[0]:.1f}')

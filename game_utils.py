@@ -6,6 +6,7 @@ from actu import life_liability_pv_mu,get_mort_tab,\
 from neural_net import NeuralNet
 from faker import Faker
 from utils import sex_format,risk_num_format
+from cloud_storage import update_user_data_item
 file_path='data.csv'
 
 def np_to_int(mixed_array):
@@ -126,18 +127,26 @@ def print_people(people):
             print_person(people[i])
 
 def dp_print_header():
+    high_score=st.session_state['high_score']
     score=st.session_state['score']
     st.title('Death Predictor Game')
     st.subheader('Who (statistically) has the longest left to live?')
     st.markdown('Guess correctly to gain points, guess wrongly to lose points')
+    st.subheader(f'*High Score:\t{round(high_score)}*')
     st.subheader(f'*Current Score:\t{round(score)}*')
-    return score
+    return high_score,score
 
 def update_score(mus,amount,age):
     st.session_state['guessed']=True
     score = st.session_state['score']
     if age==max(mus):
         st.session_state['score']=score+amount
+        print(f'Current score {st.session_state['score']}')
+        print(f'Current highscore: {st.session_state['high_score']}')
+        if st.session_state['score']>st.session_state['high_score']:
+            print('High score')
+            st.session_state['high_score']=score
+            update_user_data_item(st.experimental_user.email, 2, score)
     else:
         st.session_state['score']=score-amount
 
