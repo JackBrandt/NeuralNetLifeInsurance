@@ -141,10 +141,10 @@ def update_score(mus,amount,age):
     score = st.session_state['score']
     if age==max(mus):
         st.session_state['score']=score+amount
-        print(f'Current score {st.session_state['score']}')
-        print(f'Current highscore: {st.session_state['high_score']}')
+        #print(f'Current score {st.session_state['score']}')
+        #print(f'Current highscore: {st.session_state['high_score']}')
         if st.session_state['score']>st.session_state['high_score']:
-            print('High score')
+            #print('Previous High score')
             st.session_state['high_score']=score
             update_user_data_item(st.experimental_user.email, 2, score)
     else:

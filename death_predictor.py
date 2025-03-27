@@ -16,10 +16,10 @@ update_w_price3 = lambda : update_score(mus,prices[2],mus[2])
 def check_guess():
     points = prices[0]*(1-abs(mu_guess-mus[0])/7.5)
     st.session_state['score']=st.session_state['score']+points
-    print(f'Current score {st.session_state['score']}')
-    print(f'Current highscore: {highscore}')
+    #print(f'Current score {st.session_state['score']}')
+    #print(f'Current highscore: {st.session_state['']}')
     if st.session_state['score']>highscore:
-        print('High score')
+        #print('High score')
         st.session_state['high_score']=score
         update_user_data_item(st.experimental_user.email, 2, score)
     st.session_state['guessed']=True

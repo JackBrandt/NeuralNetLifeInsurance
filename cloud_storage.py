@@ -103,6 +103,10 @@ def load_user_data(email):
     #for i,value in enumerate(user_data[1]):
     #    if value=='None':
     #        user_data[1][i]=None
+    try:
+        user_data[2]=float(user_data[2])
+    except:
+        pass
     return user_data
 
 def unload_user_data(user_data):
@@ -116,7 +120,11 @@ def write_user_data(updated_data):
 
 def update_user_data_item(email,item_index,item):
     user_data=load_user_data(email)
-    user_data[item_index]=item
+    try:
+        user_data[item_index]=item
+    except IndexError:
+        if item_index>=0:
+            user_data.append(item)
     write_user_data(user_data)
     return user_data
 
