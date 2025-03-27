@@ -4,6 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from scipy.ndimage import gaussian_filter1d
 import streamlit as st
+import torch
 
 #TODO: Fix function headers
 

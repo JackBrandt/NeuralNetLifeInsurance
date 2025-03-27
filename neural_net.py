@@ -80,13 +80,13 @@ def load_prep_data(file_path, target_col, test_size=0.2, random_state=42):
     return X_train_tensor, X_test_tensor, y_train_tensor, y_test_tensor
 
 # Define the neural network model
-class LifeNet(nn.Module):
+class NeuralNet(nn.Module):
     def __init__(self, input_dim, hidden_dim=32, output_dim=2):
         """
         Simple feedforward neural network:
         input_dim -> hidden_dim -> hidden_dim -> output_dim
         """
-        super(LifeNet, self).__init__()
+        super(NeuralNet, self).__init__()
         self.net = nn.Sequential(
             nn.Linear(input_dim, hidden_dim),
             nn.ReLU(),
@@ -240,6 +240,7 @@ def make_all_models(age_cap: int):
         model.train_save(2,1)
 
 if __name__ == "__main__":
+    
     from utils import plot_mort
     make_all_models(80)
     model=load_model('models/25.pth')
