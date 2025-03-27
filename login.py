@@ -2,7 +2,7 @@ import streamlit as st
 from cloud_storage import load_user_data, unload_user_data
 import os
 
-st.write("GOOGLE_APPLICATION_CREDENTIALS:", os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"))
+#st.write("GOOGLE_APPLICATION_CREDENTIALS:", os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"))
 
 st.header('Welcome to Neural Net Life')
 st.subheader("Please login below, than navigate to any of the following pages on the left")
@@ -13,10 +13,10 @@ if not st.experimental_user.is_logged_in:
         #user_data=load_user_data(st.experimental_user.email)
         #st.write(user_data)
 else:
-    user_data=load_user_data(st.experimental_user.email)
-    st.write(user_data)
+    #user_data=st.session_state['prev_user_inputs']
+    #st.write(user_data)
     st.write(f"Hello, {st.experimental_user.name}!")
-    st.write(st.experimental_user.items())
+    #st.write(st.experimental_user.items())
     if st.button("Log out"):
         st.logout()
         #user_data=unload_user_data(user_data)

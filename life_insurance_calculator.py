@@ -29,11 +29,12 @@ elif policy_type in ['fl','fd']:
 make_policy=st.checkbox('Check this box to specify you want to create a model policy, leave it unchecked to only calculate the expected cost')
 
 if st.button("Click me"):
-    st.session_state['prev_user_inputs']=inputs
-    try:
-        st.write(update_user_data_item(st.experimental_user.email,1,inputs))
-    except:
-        pass
+    if inputs!=st.session_state['prev_user_inputs']:
+        st.session_state['prev_user_inputs']=inputs
+        try:
+            st.write(update_user_data_item(st.experimental_user.email,1,inputs))
+        except:
+            pass
     st.write(actu_str(inputs,fv,age,policy_type,duration,payment_type,st.session_state['interest_rate']))
     if make_policy:
         pass

@@ -4,11 +4,12 @@ from game_utils import get_yrs_left
 from life_predict_utils import possible_options,bool_to_together_separat,life_predictor
 from actu import get_mort_tab
 import pandas as pd
+from cloud_storage import update_user_data_item
 
 st.header('Life Predictor')
 st.subheader('Enter your info to get predictions about your life expectancy')
 age=st.number_input('What\'s your current age?',max_value=79,value=21)
-inputs=st_get_inputs()
+inputs=st_get_inputs(st.session_state['prev_user_inputs'])
 life_p=life_predictor(inputs,age)
 
 def check_options():
