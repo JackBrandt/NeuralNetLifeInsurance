@@ -1,13 +1,16 @@
-from neural_net import load_model
-from utils import format_policy_type
+from neural_net import load_model, NeuralNet
+from utils import policy_type_format
 
-def get_mortality_table(age, inputs):
-    """Retrieve a mortality table from a neural network model based on age and inputs."""
-    default_years = 25 - age if age < 25 else 0
-    path='models/'+str(int(age+default_years))+'.pth'  # Correctly form the path string
-    model = load_model(path)  # Ensure the path is passed here
-    mortality_df = model.get_life_data([inputs], is_tensor=False, smooth=True, sigma=10)
-    return mortality_df[0].to_numpy()
+def get_mort_tab(age,inputs,smooth=100):
+    if age<25:
+        def_years=25-age
+    else:
+        def_years=0
+    path='models/'+str(int(age+def_years))+'.pth'
+    model=load_model(path)
+    mort_df=model.get_life_data([inputs],False,smooth,sigma=7.5)
+    mort_tab=mort_df[0].to_numpy()
+    return mort_tab
 
 def calculate_present_value(fv, n, i):
     """Calculate the present value of a future payment given interest rate and number of years."""
@@ -53,5 +56,4 @@ def actuarial_string(inputs, fv, age, policy_type='fl', duration=None, payment_t
         return "Unknown payment type provided."
 
 if __name__ == "__main__":
-    # Example usage
-    print(actuarial_string([180, 'm', 72, 130, 'n', 'n', 3, 1, 1, 'n', 'n', 'n', 4, 'n', 0, 'n', 'n', 200, 'n', 'n', 'n', 'n', 'n'], 250000, 20, payment_type='Annual'))
+    print(actu_str([160,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','y','y','y'],250000,20))

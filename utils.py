@@ -5,35 +5,79 @@ from sklearn.preprocessing import StandardScaler
 from scipy.ndimage import gaussian_filter1d
 import streamlit as st
 
-def load_and_preprocess_data(filepath: str, target_age: int):
-    """
-    Loads data from a CSV file, cleans, and preprocesses it.
-    """
-    # Load data
-    data = pd.read_csv(filepath)
-    print("Dataset columns:", data.columns.tolist())
-    
-    # Clean data
-    # Allow two missing values per row
-    data.dropna(axis=0, thresh=len(data.columns)-2, inplace=True)
-    # Drop columns with more than 20% missing values
-    data.dropna(axis=1, thresh=0.8*len(data), inplace=True)
-    
-    # Filter data by age and blood pressure
-    if 'age_column' in data.columns:
-        data = data[(data['age_column'] >= 18) & (data['age_column'] <= 100)]
-    if 'bp_column' in data.columns:
-        data = data[data['bp_column'] > 0]
-    
-    # Remove duplicates
-    if 'id_column' in data.columns:
-        data.drop_duplicates(subset=['id_column'], inplace=True)
-    
-    # Extract features and target
-    X = data.drop('target_column', axis=1)  # Placeholder: Replace 'target_column' with actual column name
-    y = data['target_column']
-    
-    # Scale features
+#TODO: Fix function headers
+
+def convert_to_binary(value):
+    """Converts 'm' or 'y' to 1, otherwise returns 0."""
+    return 1 if str(value).lower() in ["m", "y"] else 0
+
+def load_prep_data(file_path,age):
+    '''Loads and preps data...
+    Args:
+        file_path (str):...
+    Returns:
+        X (array of arrays)
+        y (array of arrays)
+    '''
+    # Load CSV file
+    df = pd.read_csv(file_path, header=0)
+    df = df[df['age'] >= age]
+
+    # Extract target (y) and features (X)
+    empty=[0]*(int(96-(age-25)))
+    y_vals = df.iloc[:, 0].values  # First column is target
+    y_vals=[value-age for value in y_vals]
+    y=[empty.copy() for _ in y_vals]
+    for i,y_val in enumerate(y_vals):
+        y[i][y_val]=1
+    #print(y_vals[0])
+    #print(y[0][72])
+    X = df.iloc[:, 1:].copy()  # Everything else is features
+    input_cols=X.columns
+    # Convert categorical columns to numerical values
+    for col in X.select_dtypes(include=['object']).columns:
+        X[col] = X[col].apply(lambda x: convert_to_binary(x))
+
+    # Normalize numerical features
+    scaler = StandardScaler()
+    X = scaler.fit_transform(X)  # Standardize input features
+
+    # Convert to PyTorch tensors
+    #print(y)
+    X_tensor = torch.tensor(X, dtype=torch.float32)
+    y_tensor = torch.tensor(y, dtype=torch.float32)  # Use long for classification
+
+    # Split into train and test sets
+    X_train, X_test, y_train, y_test =  train_test_split(X_tensor, y_tensor, test_size=0.2, random_state=42)
+    return X_train, X_test, y_train, y_test, scaler, input_cols
+
+def load_fold_data(file_path):
+    '''Loads and preps data...
+    Args:
+        file_path (str):...
+    Returns:
+        X (array of arrays)
+        y (array of arrays)
+    '''
+    # Load CSV file
+    df = pd.read_csv(file_path, header=0)
+
+    # Extract target (y) and features (X)
+    empty=[0]*96
+    y_vals = df.iloc[:, 0].values  # First column is target
+    y_vals=[value-25 for value in y_vals]
+    y=[empty.copy() for _ in y_vals]
+    for i,y_val in enumerate(y_vals):
+        y[i][y_val]=1
+    #print(y_vals[0])
+    #print(y[0][72])
+    X = df.iloc[:, 1:].copy()  # Everything else is features
+    input_cols=X.columns
+    # Convert categorical columns to numerical values
+    for col in X.select_dtypes(include=['object']).columns:
+        X[col] = X[col].apply(lambda x: convert_to_binary(x))
+
+    # Normalize numerical features
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
     
@@ -110,3 +154,17 @@ def format_policy_type(policy_type: str, duration: int = None) -> str:
     elif policy_type == 'fd':
         return f'Fixed-Rate for {duration} years' if duration else 'Fixed-Rate for Duration'
     return 'Variable Rate'
+
+def store_value(perm_key):
+    # Copy the value to the permanent key
+    st.session_state[perm_key] = st.session_state["_"+perm_key]
+
+def load_value(perm_key):
+    # Copy the value to the permanent key
+    st.session_state["_"+perm_key] = st.session_state[perm_key]
+
+def get_storage_function(perm_key):
+    return lambda : store_value(perm_key)
+
+def get_loading_function(perm_key):
+    return lambda : load_value(perm_key)

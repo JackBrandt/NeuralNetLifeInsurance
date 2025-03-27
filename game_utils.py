@@ -55,13 +55,16 @@ def price_individual(individual, interest_rate):
     face_value = 1250
     return calculate_life_insurance_liability(face_value, interest_rate, mortality_table, 0)
 
-def years_remaining(individual):
-    """Estimates years left for an individual based on actuarial data."""
-    age = individual[1]
-    default_years = 25 - age if age < 25 else 0
-    inputs = individual[2:]
-    mortality_table = get_mortality_table(age, inputs)
-    return actuarial_string(mortality_table, default_years)
+def get_yrs_left(person):
+    person=person[1:]
+    age=person[0]
+    if age<25:
+        def_yrs=25-age
+    else:
+        def_yrs=0
+    inputs=person[1:]
+    mort_tab=get_mort_tab(age,inputs,50)
+    return years_left_mu(mort_tab,def_yrs)
 
 def calculate_years_remaining_for_all(individuals):
     """Calculates years remaining for all individuals in a list."""
@@ -158,3 +161,11 @@ def play_game():
             for year, price in zip(remaining_years, prices):
                 st.text(f'{year:.1f} years: {"+" if correct else "-"}{round(price)} points')
             st.session_state['guessed'] = True
+
+if __name__ == '__main__':
+    print(get_yrs_left(['',25,160,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','y','y','y']))
+    print(get_yrs_left(['',26,160,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','y','y','y']))
+    print(get_yrs_left(['',27,160,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','y','y','y']))
+    print(get_yrs_left(['',28,160,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','y','y','y']))
+    print(get_yrs_left(['',29,160,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','y','y','y']))
+    print(get_yrs_left(['',30,160,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','y','y','y']))

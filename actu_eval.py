@@ -6,7 +6,7 @@ from utils import load_fold_data
 from torch.utils.data import DataLoader, TensorDataset
 from actu import life_liability_pv_mu, payout_pv
 
-def actuarial_model_eval(I,training_reps,fold_num=5,smooth=False,sigma=5):
+def actuarial_model_eval(age,I,training_reps,fold_num=5,smooth=0,sigma=5):
     '''Evaluates the performance of our model with regard to actuarial performance
     Args:
         I: The interest rate as a percentage, e.g. 1% => 1
@@ -41,7 +41,7 @@ def actuarial_model_eval(I,training_reps,fold_num=5,smooth=False,sigma=5):
         train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 
         # Now we train the model
-        NN_model = NeuralNet()
+        NN_model = NeuralNet(age)
         NN_model.neural_net_train(train_loader,training_reps,False)
 
         # Now we test: Compare expected liability with actual
@@ -74,7 +74,7 @@ def actuarial_model_eval(I,training_reps,fold_num=5,smooth=False,sigma=5):
 
 if __name__ == "__main__":
     #actuarial_model_eval(1,2,10)
-    actuarial_model_eval(1,2,10,True,10)
+    actuarial_model_eval(25,1,2,10,50,10)
     # Conclusion: Smoothing improves accuracy and reduces bias
     # Not sure on ideal sigma though...
     # Also need to test number of training reps...

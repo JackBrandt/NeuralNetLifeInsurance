@@ -95,60 +95,159 @@ class LifeNet(nn.Module):
             nn.Linear(hidden_dim, output_dim)
         )
     def forward(self, x):
-        # Forward pass: pass input through defined sequential layers
-        return self.net(x)
+        x = self.relu(self.fc1(x))
+        #x = self.relu(self.fc2(x))
+        x = self.fc2(x)
+        return self.softmax(x)  # Use softmax if classification
 
-def train_model(model, train_loader, val_loader, criterion, optimizer, epochs=10):
-    """
-    Function to train the model. Evaluate loss and accuracy on validation set after each epoch.
-    """
-    for epoch in range(1, epochs+1):
-        model.train()  # Switch to training mode
-        running_loss = 0.0
-        for batch_X, batch_y in train_loader:
-            optimizer.zero_grad()          # Clear previous gradients
-            outputs = model(batch_X)       # Forward pass to get outputs
-            loss = criterion(outputs, batch_y)  # Calculate loss
-            loss.backward()                # Backpropagate to calculate gradients
-            optimizer.step()               # Update network parameters
-            running_loss += loss.item() * batch_X.size(0)  # Accumulate total loss (weighted by number of samples)
-        # Calculate average training loss
-        avg_train_loss = running_loss / len(train_loader.dataset)
-        # Evaluate on validation set
-        val_loss, val_acc = evaluate_model(model, val_loader, criterion)
-        print(f"Epoch {epoch}/{epochs} - Train Loss: {avg_train_loss:.4f}, "
-              f"Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.4f}")
-    return model
+    def save_model(self):
+        """Saves the neural network model."""
+        age=25+96-self.fc2.out_features
+        filepath='models/'+str(age)+'.pth'
+        torch.save(self, filepath)  # Save model parameters
+        print(f"Model saved to {filepath}")
 
-def evaluate_model(model, data_loader, criterion):
-    """
-    Evaluate the model on a given dataset, return average loss and accuracy.
-    Gradients are not calculated during evaluation.
-    """
-    model.eval()  # Switch to evaluation mode
-    total_loss = 0.0
-    total_correct = 0
-    total_samples = 0
-    with torch.no_grad():  # Disable gradient calculation
-        for batch_X, batch_y in data_loader:
-            outputs = model(batch_X)
-            loss = criterion(outputs, batch_y)
-            total_loss += loss.item() * batch_X.size(0)
-            # For classification, predict the class with the highest logit
-            preds = outputs.argmax(dim=1)
-            total_correct += (preds == batch_y).sum().item()
-            total_samples += batch_X.size(0)
-    avg_loss = total_loss / total_samples
-    accuracy = total_correct / total_samples
-    return avg_loss, accuracy
+    # Training loop
+    def neural_net_train(self,train_loader, epoch=1, print_statement=True):
+        '''Trains the nn
+        Args:
+            epoch (int): number of times to run through the data'''
+        self.train()
+        num_epochs = 1  # Set number of epochs
+        for epoch in range(num_epochs):
+            running_loss = 0.0
+            batch_counter=1
+            for inputs, labels in train_loader:
+                #print(batch_counter)
+                self.optimizer.zero_grad()  # Zero the gradients
+                outputs = self(inputs)  # Forward pass
+                loss = self.criterion(outputs, labels)  # Compute loss
+                loss.backward()  # Backpropagation
+                self.optimizer.step()  # Update weights
+                running_loss += loss.item()
+                batch_counter+=1
+            if print_statement:
+                print(f"Epoch {epoch+1}/{num_epochs}, Loss: {running_loss/len(train_loader):.4f}")
+        print("Training complete!")
 
-def save_model(model, path):
-    """Save model parameters to a specified path."""
-    torch.save(model.state_dict(), path)
+    # Evaluation
+    def neural_net_eval(self,test_loader):
+        self.eval()  # Set to evaluation mode
+        sum_of_mean_absolute_errors=0
+        with torch.no_grad():
+            for inputs, labels in test_loader:
+                #print(labels.shape)
+                outputs=self(inputs)
+                #print(outputs.shape)
+                #print(outputs)
+                #_, predicted = torch.max(outputs, 1)  # Get class with highest probability
+                for i, output in enumerate(outputs):
+                    single_sum_errors=0
+                    #print(output.shape)
+                    #try: print(labels[i].shape)
+                    #except IndexError: print(i, labels)
+                    #print(output)
+                    for j, value in enumerate(output):
+                        error=abs(value-labels[i][j])
+                        single_sum_errors+=error
+                    sum_of_mean_absolute_errors=single_sum_errors/len(output)
+        mean_mean_absolute_error = sum_of_mean_absolute_errors/len(outputs)
+        print(f"Test Mean Mean Absolute Error: {mean_mean_absolute_error}")
 
-def load_model(model_class, path, *args, **kwargs):
-    """Load model parameters and return model instance. Model class and initialization parameters are required."""
-    model = model_class(*args, **kwargs)
-    model.load_state_dict(torch.load(path))
-    model.eval()  # Switch model to evaluation mode
-    return model
+    def train_eval_save(self, reps, epoch, eval_always=True):
+        '''Trains, evaluates, and saves model:
+        Args:
+            reps: Number loops of training/eval
+            epoch: Number of trainings between evals
+            eval_always: Defaults to true, if false doesn't evaluate until final train'''
+        X_train, X_test, y_train, y_test, self.scaler, self.cols = load_prep_data('data.csv',25+(96-self.fc2.out_features))
+        train_dataset = TensorDataset(X_train, y_train)
+        test_dataset = TensorDataset(X_test, y_test)
+        train_loader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True)
+        test_loader = DataLoader(test_dataset, batch_size=self.batch_size, shuffle=False)
+        for i in range(reps):
+            self.neural_net_train(train_loader,epoch)#Change epoch to do more training between evals
+            if eval_always or i== reps:
+                self.neural_net_eval(test_loader)
+            self.save_model()
+        return test_loader # For testing loading
+
+    def train_save(self, reps, epoch):
+        '''Trains, evaluates, and saves model:
+        Args:
+            reps: Number loops of training/eval
+            epoch: Number of trainings between evals
+        '''
+        X_train, y_train, self.scaler, self.cols = load_prep_data(25+(96-self.fc2.out_features),test=False)
+        print(f'Len X_train: {len(X_train)}')
+        print(0.001*((10000/len(X_train))**(.1)))
+        self.optimizer = optim.Adam(self.parameters(), lr=0.001*((10000/len(X_train))**(.5)))# Adjust learning speed using training data size
+        train_dataset = TensorDataset(X_train, y_train)
+        train_loader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True)
+        for i in range(reps):
+            self.neural_net_train(train_loader,epoch)#Change epoch to do more training between evals
+            self.save_model()
+
+    def get_life_data(self, inputs=None, is_tensor=False,smooth_percentage=0,sigma=5):
+        if inputs is None:
+            # Get inputs
+            inputs=get_life_inputs()
+        if is_tensor==False:
+            # Prep Inputs
+            inputs=pd.DataFrame(inputs,columns=self.cols)
+            for i,col in enumerate(inputs.select_dtypes(include=['object']).columns):
+                inputs[col] = inputs[col].apply(lambda x: convert_to_binary(x))
+            inputs=self.scaler.transform(inputs)
+            tensor_input=torch.tensor(inputs, dtype=torch.float32)
+        else:
+            tensor_input=inputs
+        # Get model predictions
+        self.eval()
+        with torch.no_grad():
+            output = self(tensor_input)
+        output = pd.DataFrame(output.numpy())
+        output = output.transpose()
+        output.index=[str(i) for i in range(25+(96-self.fc2.out_features),121)]
+        #output.to_csv()
+        if smooth_percentage>0:
+            smooth_percentage=smooth_percentage/100
+            return smooth_percentage*gaussian_smooth(output,sigma)+(1-smooth_percentage)*output
+        else:
+            return output
+
+def make_all_models(age_cap: int):
+    """
+    Generate and train NeuralNet models for ages 25-age_cap with fixed training parameters.
+
+    Creates a series of models for each age from 25 to age_cap-1 (inclusive), trains them using
+    hardcoded training parameters, and saves them via train_eval_save().
+
+    Args:
+        age_cap (int): non-included age cap
+
+    Returns:
+        None: Models are saved but not returned directly
+
+    Example:
+        >>> make_all_models(80)
+
+    Note:
+        - Uses fixed training params: 2 epochs, 1 batch_size, save=True
+        - Sequential execution may take substantial time for 55 models
+    """
+    for age in range(25,age_cap):
+        model=NeuralNet(age)
+        model.train_save(2,1)
+
+if __name__ == "__main__":
+    from utils import plot_mort
+    make_all_models(80)
+    model=load_model('models/25.pth')
+    mort_df=model.get_life_data([[180,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','n','n','n']])
+    plot_mort(mort_df)
+    print(mort_df)
+    smoothed_df = mort_df=model.get_life_data([[180,'m',72,130,'n','n',3,1,1,'n','n','n',4,'n',0,'n','n',200,'n','n','n','n','n']],smooth_percentage=100,)
+    #print(smoothed_df.sum())
+    plot_mort(smoothed_df)
+    #print(smoothed_df)
+
