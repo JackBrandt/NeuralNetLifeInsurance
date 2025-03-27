@@ -1,9 +1,12 @@
 # Imports the Google Cloud client library
 from google.cloud import storage
 import csv
+import os
+#import streamlit as st
 
 class bucket_csv_object():
     def __init__(self,bucket_name='bucket-quickstart_snappy-rainfall-454116-t5',csv_name='users.csv'):
+        # Verify
         self.bucket_name=bucket_name
         self.csv_name=csv_name
         self.storage_client = storage.Client()
