@@ -21,7 +21,7 @@ def prep_data(df, age,test=True,sigma=10):
 
     # Extract target (y) and features (X)
     empty=[0]*(int(96-(age-25)))
-    y_vals = df.iloc[:, 0].values  # First column is target
+    y_vals = df.iloc[:, 0].values  # Firspyt column is target
     y_vals=[value-age for value in y_vals]
     y=[empty.copy() for _ in y_vals]
     for i,y_val in enumerate(y_vals):
