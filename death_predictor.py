@@ -20,8 +20,11 @@ def check_guess():
     #print(f'Current highscore: {st.session_state['']}')
     if st.session_state['score']>highscore:
         #print('High score')
-        st.session_state['high_score']=score
-        update_user_data_item(st.experimental_user.email, 2, score)
+        st.session_state['high_score']=st.session_state['score']
+        try:
+            update_user_data_item(st.experimental_user.email, 2, score)
+        except AttributeError:
+            pass
     st.session_state['guessed']=True
 
 def print_guess_results():
@@ -29,6 +32,8 @@ def print_guess_results():
     #print(f'points={points}')
     if points>=0:
         st.subheader('Good job!')
+        if st.session_state['score']==st.session_state['high_score']:
+            st.subheader('New highscore!')
         st.text(f'Correct answer was: {mus[0]:.1f}')
         st.text(f'Plus {points:.1f} points')
     else:

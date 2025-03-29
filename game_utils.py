@@ -145,8 +145,11 @@ def update_score(mus,amount,age):
         #print(f'Current highscore: {st.session_state['high_score']}')
         if st.session_state['score']>st.session_state['high_score']:
             #print('Previous High score')
-            st.session_state['high_score']=score
-            update_user_data_item(st.experimental_user.email, 2, score)
+            st.session_state['high_score']=st.session_state['score']
+            try:
+                update_user_data_item(st.experimental_user.email, 2, score)
+            except AttributeError:
+                pass
     else:
         st.session_state['score']=score-amount
 
@@ -197,6 +200,8 @@ def guess_button(person_index,update_function,people,mus,prices):
     if st.button(people[person_index][0],key=f'person{person_index}',on_click=update_function,disabled=st.session_state['guessed']):
         if mus[person_index] is max(mus):
             st.subheader('Correct!')
+            if st.session_state['score']==st.session_state['high_score']:
+                st.subheader('New highscore!')
             mu_comparison(mus)
             st.text(f'Plus {round(prices[person_index])} points')
         else:
