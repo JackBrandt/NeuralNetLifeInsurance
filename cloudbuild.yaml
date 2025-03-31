@@ -1,25 +1,39 @@
 steps:
-# Step 1: Build the image
+# Cache warm-up (silent fail if no image exists)
+- name: 'gcr.io/cloud-builders/docker'
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - 'docker pull gcr.io/$${PROJECT_ID}/streamlit-app:latest || exit 0'
+  id: pull-cache
+
+# Main build with BuildKit
 - name: 'gcr.io/cloud-builders/docker'
   args: [
     'build',
-    '-t', 'gcr.io/$PROJECT_ID/streamlit-app',
-    '-f', '.devcontainer/Dockerfile',  # Add this line
+    '-t', 'gcr.io/${PROJECT_ID}/streamlit-app:latest',
+    '-f', '.devcontainer/Dockerfile',
+    '--cache-from', 'gcr.io/${PROJECT_ID}/streamlit-app:latest',
+    '--build-arg', 'BUILDKIT_INLINE_CACHE=1',
     '.'
   ]
+  env:
+    - 'DOCKER_BUILDKIT=1'
+    - 'COMPOSE_DOCKER_CLI_BUILD=1'
 
-# Step 2: Push the image
+# Push with cache metadata
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'gcr.io/${PROJECT_ID}/streamlit-app']
+  args: ['push', 'gcr.io/${PROJECT_ID}/streamlit-app:latest']
 
-# Step 3: Deploy to Cloud Run
+# Deployment
 - name: 'gcr.io/cloud-builders/gcloud'
   args: [
     'run', 'deploy', 'streamlit-app',
-    '--image', 'gcr.io/${PROJECT_ID}/streamlit-app',
+    '--image', 'gcr.io/${PROJECT_ID}/streamlit-app:latest',
     '--region', 'us-central1',
     '--platform', 'managed',
-    '--allow-unauthenticated'
+    '--allow-unauthenticated',
+    '--set-env-vars', 'STREAMLIT_SECRET_NAME=projects/${PROJECT_ID}/secrets/streamlit_client_secret/versions/latest'
   ]
 
-images: ['gcr.io/${PROJECT_ID}/streamlit-app']
+images: ['gcr.io/${PROJECT_ID}/streamlit-app:latest']
