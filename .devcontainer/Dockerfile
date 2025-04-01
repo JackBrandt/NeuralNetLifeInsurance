@@ -4,7 +4,7 @@ FROM mcr.microsoft.com/devcontainers/anaconda:1-3
 COPY requirements.txt ./
 
 # Install dependencies including Secret Manager client
-RUN pip install --no-cache-dir -r requirements.txt \
+RUN pip install -r requirements.txt \
     && pip install google-cloud-secret-manager
 
 # Install Google Cloud SDK
@@ -20,6 +20,8 @@ COPY . .
 RUN mkdir -p .streamlit
 COPY .devcontainer/entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
+
+RUN pip install git-filter-repo
 
 # Conda environment setup
 RUN if [ -f "/tmp/conda-tmp/environment.yml" ]; then umask 0002 && /opt/conda/bin/conda env update -n base -f /tmp/conda-tmp/environment.yml; fi \
