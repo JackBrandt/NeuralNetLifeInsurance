@@ -29,7 +29,7 @@ if 'check_options' not in st.session_state:
     st.session_state['check_options']=False
 if 'prev_user_inputs' not in st.session_state or 'high_score' not in st.session_state:
     try:
-        user_data=load_user_data(st.experimental_user.email)
+        user_data=load_user_data(st.experimental_user.get('email'))
         try:
             st.session_state['prev_user_inputs']=user_data[1]
         except:
@@ -41,6 +41,7 @@ if 'prev_user_inputs' not in st.session_state or 'high_score' not in st.session_
         except:
             st.session_state['high_score']=0
     except:
+        print("Error with loading user data at startup")
         st.session_state['prev_user_inputs']=[None,None,None,None,None,None,None,None,
                                                 None,None,None,None,None,None,None,None,
                                                 None,None,None,None,None,None,None]

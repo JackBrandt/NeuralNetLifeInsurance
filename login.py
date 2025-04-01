@@ -6,13 +6,13 @@ import subprocess as sp
 st.header('Welcome to Neural Net Life')
 st.subheader("Please login below, than navigate to any of the following pages on the left")
 
-import streamlit as st
-
-
 st.title("Login/Logout")
-try:
-    st.session_state.get("authentication_status")
-    st.switch_page("life_insurance_calculator.py")
-except:
+st.write(st.experimental_user.get('email'))
+#st.switch_page("life_insurance_calculator.py")
+if st.experimental_user.get('email') is None:
     if st.button("Log in"):
         st.login()
+else:
+    if st.button("Log out"):
+        st.logout()
+
