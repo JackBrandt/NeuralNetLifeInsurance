@@ -138,6 +138,6 @@ if __name__ == '__main__':
     bucket.delete_row('wut')
     print(bucket.read_by_key('wut'))
     bucket.delete_row('Hello world')'''
-    bucket.wipe_data()
+    #bucket.wipe_data()
     #bucket.write_row(['wut','wut'])
     print(bucket.read_all())

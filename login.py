@@ -16,3 +16,8 @@ else:
     if st.button("Log out"):
         st.logout()
 
+try:
+    load_user_data(st.experimental_user.get('email'))
+    st.write('Cloud storage access validated')
+except:
+    st.write('Cloud storage access failed...')
