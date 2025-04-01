@@ -22,7 +22,7 @@ def check_guess():
         #print('High score')
         st.session_state['high_score']=st.session_state['score']
         try:
-            update_user_data_item(st.experimental_user.email, 2, score)
+            update_user_data_item(st.experimental_user.get('email'), 2, st.session_state['high_score'])
         except AttributeError:
             pass
     st.session_state['guessed']=True

@@ -147,7 +147,7 @@ def update_score(mus,amount,age):
             #print('Previous High score')
             st.session_state['high_score']=st.session_state['score']
             try:
-                update_user_data_item(st.experimental_user.email, 2, score)
+                update_user_data_item(st.experimental_user.email, 2, st.session_state['high_score'])
             except AttributeError:
                 pass
     else:
