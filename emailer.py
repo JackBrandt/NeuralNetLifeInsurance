@@ -2,8 +2,12 @@
 import smtplib
 # Import the email modules we'll need
 from email.message import EmailMessage
+from google.cloud import secretmanager
 
-def send_email(address, subject, msg):
+def get_email_password():
+    pass
+
+def send_email(address, subject, msg, password=None):
     email = EmailMessage()
     email.set_content(msg)
     me='neuralnetlife@gmail.com'
@@ -19,7 +23,8 @@ def send_email(address, subject, msg):
     # Create secure SSL connection
     with smtplib.SMTP_SSL(smtp_server, port) as s:
         # Login with app password
-        password = input("Enter your email APP password: ")
+        if password is None:
+            password = input("Enter your email APP password: ")
         s.login(me, password)
 
         # Send the message

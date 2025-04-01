@@ -87,6 +87,8 @@ class bucket_csv_object():
                     self.refresh_file
 
 def load_user_data(email):
+    if email=='' or email==None:
+        return
     bucket=bucket_csv_object()
     user_data=bucket.read_by_key(email)
     if user_data==None:
@@ -111,14 +113,20 @@ def load_user_data(email):
 
 def unload_user_data(user_data):
     bucket=bucket_csv_object()
+    if user_data[0]=='' or user_data[0]==None:
+        return
     bucket.write_row(user_data)
-    user_data=None
+    return None
 
 def write_user_data(updated_data):
+    if updated_data[0]=='' or updated_data[0]==None:
+        return
     bucket=bucket_csv_object()
     bucket.write_row(updated_data)
 
 def update_user_data_item(email,item_index,item):
+    if email=='' or email==None:
+        return
     user_data=load_user_data(email)
     try:
         user_data[item_index]=item
@@ -127,6 +135,10 @@ def update_user_data_item(email,item_index,item):
             user_data.append(item)
     write_user_data(user_data)
     return user_data
+
+def get_all_user_data():
+    bucket=bucket_csv_object()
+    return bucket.read_all()
 
 if __name__ == '__main__':
     bucket=bucket_csv_object()
