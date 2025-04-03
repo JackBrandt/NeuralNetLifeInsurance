@@ -313,7 +313,12 @@ def update_user_data_item(email,item_index,item):
         - It is crucial to handle data integrity and ensure that the updates are appropriately managed, especially in environments where multiple accesses might occur concurrently.
     '''
     user_data=load_user_data(email)[0]
-    user_data[item_index]=item
+    if len(user_data)>item_index:
+        user_data[item_index]=item
+    else:
+        for _ in range(item_index+1-len(user_data)):
+            user_data.append(None)
+        user_data[item_index]=item
     write_user_data(user_data)
     return user_data
 
@@ -328,6 +333,50 @@ def get_all_users():
         list_of_users.append(user[0])
     return list_of_users
 
+def get_username(email):
+    data = load_user_data(email)[0]
+    print(data)
+    return data[3]
+
+def set_username(email,new_usernmae):
+    update_user_data_item(email,3,new_usernmae)
+
+def get_friends(email):
+    data=load_user_data(email)[0]
+    try:
+        friends=data[4]
+    except IndexError:
+        friends=None
+    return friends
+
+def send_friend_request(sender_email, receipient_email):
+    try: 
+        requests=load_user_data(receipient_email)[0][5]
+        if requests is None:
+            requests=[sender_email]
+        else:
+            requests.append(sender_email)
+        update_user_data_item(receipient_email,5,requests)
+    except IndexError:
+        update_user_data_item(receipient_email,5,[sender_email])
+
+def get_friend_requests(email):
+    data=load_user_data(email)[0]
+    try:
+        requests=data[5]
+    except IndexError:
+        requests=None
+    return requests
+
+
+def set_friend(email,new_friend):
+    friends=load_user_data(email)[0][4]
+    if friends is None:
+        friends=[new_friend]
+    else:
+        friends.append(new_friend)
+    update_user_data_item(email,4,friends)
+
 if __name__ == '__main__':
     bucket=bucket_csv_object()
     '''print(bucket.read_all())
@@ -341,7 +390,8 @@ if __name__ == '__main__':
     #bucket.wipe_data()
     #bucket.write_row(['wut','wut'])
     #print(bucket.read_all())
-    print(get_all_users())
+    print(get_username('jbai@zagmail.gonzaga.edu'))
+    #print(get_all_users())
     
 
 
