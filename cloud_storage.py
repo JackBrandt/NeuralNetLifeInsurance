@@ -317,13 +317,31 @@ def update_user_data_item(email,item_index,item):
     write_user_data(user_data)
     return user_data
 
+def get_all_user_data():
+    bucket=bucket_csv_object()
+    return bucket.read_all()
+
+def get_all_users():
+    data=get_all_user_data()
+    list_of_users=[]
+    for user in data:
+        list_of_users.append(user[0])
+    return list_of_users
+
 if __name__ == '__main__':
     bucket=bucket_csv_object()
-    print(bucket.read_all())
+    '''print(bucket.read_all())
     print(bucket.check_key_existence('Key'))
     bucket.write_row(['Hello world','It is me'])
     bucket.write_row(['wut','wut'])
     print(bucket.read_all())
     bucket.delete_row('wut')
     print(bucket.read_by_key('wut'))
-    bucket.delete_row('Hello world')
+    bucket.delete_row('Hello world')'''
+    #bucket.wipe_data()
+    #bucket.write_row(['wut','wut'])
+    #print(bucket.read_all())
+    print(get_all_users())
+    
+
+

@@ -1,6 +1,6 @@
 import streamlit as st
 from neural_net import NeuralNet
-from cloud_storage import load_user_data
+from cloud_storage import load_user_data, get_all_users
 import json
 
 login = st.Page("login.py",title='Neural Net Life Login Page', icon='🏠')
@@ -37,7 +37,7 @@ else:
 if 'current_friends' not in st.session_state:
     st.session_state.current_friends = ['Alice', 'Bob', 'Charlie']
 if 'potential_friends' not in st.session_state:
-    st.session_state.potential_friends = ['David', 'Eva', 'Frank']
+    st.session_state.potential_friends = get_all_users()
 
 
 pg.run()
