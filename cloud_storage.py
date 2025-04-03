@@ -94,7 +94,7 @@ def load_user_data(email):
     if user_data==None:
         user_data=[email,[None,None,None,None,None,None,None,None,
                           None,None,None,None,None,None,None,None,
-                          None,None,None,None,None,None,None]]
+                          None,None,None,None,None,None,None,None]]
         bucket.write_row(user_data)
     else:
         user_data=user_data[0]
