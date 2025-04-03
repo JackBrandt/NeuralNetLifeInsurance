@@ -8,8 +8,9 @@ life_insurance = st.Page("life_insurance_calculator.py", title="Neural Net Life 
 life_predictor = st.Page('life_predictor.py',title='Life Predictor', icon='🧮')
 death_predictor = st.Page("death_predictor.py",title="Death Predictor Game",icon='🎮')
 settings = st.Page("settings.py",title="Settings",icon='⚙️')
+friends = st.Page("friends.py",title='Friends',icon='😎')
 
-pg = st.navigation([login,life_insurance,life_predictor,death_predictor,settings])
+pg = st.navigation([login,life_insurance,life_predictor,death_predictor,friends,settings])
 if 'interest_rate' not in st.session_state:
     st.session_state["interest_rate"]=1
 if 'people/prices/mu' not in st.session_state:
@@ -33,5 +34,10 @@ if st.experimental_user.is_logged_in:
 else:
     if 'prev_user_inputs' not in st.session_state:
         st.session_state['prev_user_inputs']=[None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,]
+if 'current_friends' not in st.session_state:
+    st.session_state.current_friends = ['Alice', 'Bob', 'Charlie']
+if 'potential_friends' not in st.session_state:
+    st.session_state.potential_friends = ['David', 'Eva', 'Frank']
+
 
 pg.run()
