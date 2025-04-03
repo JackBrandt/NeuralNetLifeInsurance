@@ -44,3 +44,4 @@ Contributions to **NeuralNetLife** are welcome! Current contributors to the proj
 - Jiaxin
 
 We appreciate your interest in improving **NeuralNetLife** and look forward to your creative and innovative enhancements.
+Link to google cloud run streamlit app: https://streamlit-app-628308967953.us-central1.run.app/
