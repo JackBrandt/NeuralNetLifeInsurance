@@ -9,7 +9,7 @@ from utils import gaussian_smooth,load_prep_data
 from sklearn.preprocessing import StandardScaler
 from utils import get_life_inputs, convert_to_binary
 
-def load_model(filepath: str):
+def load_model(filepath: str, print_statement=True) -> nn.Module:
     """
     Load a saved PyTorch model from disk and set it to evaluation mode.
 
@@ -24,7 +24,8 @@ def load_model(filepath: str):
     """
     model = torch.load(filepath, weights_only=False)
     model.eval()  # Set model to evaluation mode
-    print(f"Model loaded from {filepath}")
+    if print_statement:
+        print(f"Model loaded from {filepath}")
     return model
 
 class NeuralNet(nn.Module):

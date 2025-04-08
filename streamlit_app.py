@@ -14,9 +14,8 @@ life_insurance = st.Page("life_insurance_calculator.py", title="Neural Net Life 
 life_predictor = st.Page('life_predictor.py',title='Life Predictor', icon='🧮')
 death_predictor = st.Page("death_predictor.py",title="Death Predictor Game",icon='🎮')
 settings = st.Page("settings.py",title="Settings",icon='⚙️')
-authorized = st.Page("authorized.py",title="authorized")
 
-pg = st.navigation([login,life_insurance,life_predictor,death_predictor,settings,authorized])
+pg = st.navigation([login,life_insurance,life_predictor,death_predictor,settings])
 if 'interest_rate' not in st.session_state:
     st.session_state["interest_rate"]=1
 if 'people/prices/mu' not in st.session_state:
@@ -35,7 +34,7 @@ if 'prev_user_inputs' not in st.session_state or 'high_score' not in st.session_
         except:
             st.session_state['prev_user_inputs']=[None,None,None,None,None,None,None,None,
                                                 None,None,None,None,None,None,None,None,
-                                                None,None,None,None,None,None,None]
+                                                None,None,None,None,None,None,None,None]
         try:
             st.session_state['high_score']=user_data[2]
         except:
@@ -44,6 +43,6 @@ if 'prev_user_inputs' not in st.session_state or 'high_score' not in st.session_
         print("Error with loading user data at startup")
         st.session_state['prev_user_inputs']=[None,None,None,None,None,None,None,None,
                                                 None,None,None,None,None,None,None,None,
-                                                None,None,None,None,None,None,None]
+                                                None,None,None,None,None,None,None,None]
         st.session_state['high_score']=0
 pg.run()
