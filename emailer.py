@@ -5,7 +5,9 @@ from email.message import EmailMessage
 from google.cloud import secretmanager
 
 def get_email_password():
-    pass
+    client = secretmanager.SecretManagerServiceClient()
+    response = client.access_secret_version(name='projects/snappy-rainfall-454116-t5/secrets/email_password/versions/latest')
+    return response.payload.data.decode('UTF-8')
 
 def send_email(address, subject, msg, password=None):
     email = EmailMessage()
@@ -31,4 +33,5 @@ def send_email(address, subject, msg, password=None):
         s.send_message(email)
 
 if __name__ == '__main__':
-    send_email('jbrandt4@zagmail.gonzaga.edu','Emailer Test','This is a test of the emailer.py')
+    password = get_email_password()
+    send_email('jbrandt4@zagmail.gonzaga.edu','Emailer Test','This is a test of the emailer.py',password)

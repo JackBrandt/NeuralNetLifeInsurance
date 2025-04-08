@@ -15,6 +15,9 @@ minute=60
 hour=minute*60
 day=hour*24
 
+def unwrap_string(string):
+    return string[string.index("'")+1:string.index("'",string.index("'")+1)]
+
 def string_to_list(string):
     # Convert string to list
     string = string.replace('[','').replace(']','')
@@ -30,6 +33,12 @@ def string_to_list(string):
         string=[2025-int(string[0][14:18])]+string[3:]
     except:
         pass
+        # Unwrap each string
+    for i in range(len(string)):
+        try:
+            string[i]=unwrap_string(string[i])
+        except:
+            pass
     return string
 
 def user_list_of_dicts():
@@ -86,6 +95,7 @@ def find_best_change(user,user_index):
     best_change=([None,None,None],0)
     for change in changeables:
         result=test_change(cur_life_expec,user['data'],change)
+        print(result)
         if result>best_change[1]:
             best_change=(change,result)
     return best_change
@@ -136,7 +146,7 @@ def get_msg(user,best_change):
     msg+=f'We noticed you could increase your lifespan by {best_change[1]:.1f} years by '
     msg+=change_specific_message_part(best_change)
     msg+='We recommend you make these changes so that you can live longer. And that you update your personal info online so that we can save you money on your life insurance.'
-    msg+='\n\nHere\'s the link to the website: ...\n And, from all of us at Neural Net Life, thank you for being a member.'
+    msg+='\n\nHere\'s the link to the website: ...\nAnd, from all of us at Neural Net Life,\n thank you for being a member.'
     return msg
 
 def whatif_analysis(users):
@@ -166,4 +176,4 @@ while True:
         print(user['subject'])
         print(user['msg'])
     email_users(users)
-    time.sleep(minute)
+    time.sleep(day)
