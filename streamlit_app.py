@@ -45,4 +45,5 @@ if 'prev_user_inputs' not in st.session_state or 'high_score' not in st.session_
                                                 None,None,None,None,None,None,None,None,
                                                 None,None,None,None,None,None,None,None]
         st.session_state['high_score']=0
+
 pg.run()
