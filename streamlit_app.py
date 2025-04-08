@@ -1,6 +1,6 @@
 import streamlit as st
 from neural_net import NeuralNet
-from cloud_storage import load_user_data
+from cloud_storage import load_user_data, get_all_users,get_friends
 import json
 from google.cloud import storage
 import google.auth
@@ -15,9 +15,9 @@ life_insurance = st.Page("life_insurance_calculator.py", title="Neural Net Life 
 life_predictor = st.Page('life_predictor.py',title='Life Predictor', icon='🧮')
 death_predictor = st.Page("death_predictor.py",title="Death Predictor Game",icon='🎮')
 settings = st.Page("settings.py",title="Settings",icon='⚙️')
+friends = st.Page("friends.py",title='Friends',icon='😎')
 
-
-pg = st.navigation([login,life_insurance,life_predictor,death_predictor,settings])
+pg = st.navigation([login,life_insurance,life_predictor,death_predictor,friends,settings])
 if 'interest_rate' not in st.session_state:
     st.session_state["interest_rate"]=1
 if 'people/prices/mu' not in st.session_state:
@@ -46,6 +46,12 @@ if 'prev_user_inputs' not in st.session_state or 'high_score' not in st.session_
         print("Error with loading user data at startup")
         st.session_state['prev_user_inputs']=[None,None,None,None,None,None,None,None,
                                                 None,None,None,None,None,None,None,None,
-                                                None,None,None,None,None,None,None,None]
+                                                None,None,None,None,None,None,None]
         st.session_state['high_score']=0
+if 'current_friends' not in st.session_state:
+    st.session_state.current_friends = get_friends(st.experimental_user.get('email'))
+if 'potential_friends' not in st.session_state:
+    st.session_state.potential_friends = get_all_users()
+
+
 pg.run()
