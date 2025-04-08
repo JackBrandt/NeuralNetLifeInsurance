@@ -203,8 +203,20 @@ def get_storage_function(perm_key):
 def get_loading_function(perm_key):
     return lambda : load_value(perm_key)
 
+def str_int_workaround(string):
+    match string:
+        case "1.0":
+            return 1
+        case "2.0":
+            return 2
+        case "3.0":
+            return 3
+        case _:
+            raise Exception
+
 def st_get_inputs(previous_user_inputs):
     st.write("Please enter your personal info and risk factors below to get started")
+    st.write(previous_user_inputs)
     dob = st.date_input("Date of birth",value=previous_user_inputs[0],format="MM/DD/YYYY")
     weight = st.text_input("Weight(lbs): ",value=previous_user_inputs[1])
     sex = st.pills("Sex:", ['m','f'],key='sex', selection_mode="single", format_func=sex_format, label_visibility="visible",default=previous_user_inputs[2])
@@ -213,8 +225,8 @@ def st_get_inputs(previous_user_inputs):
     smoker = st.pills("Do you smoke:", ['y','n'],key='smoke', selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[5])
     nic_other = st.pills("Do you use other forms of nicotine? (e.g., vape or chewing tobacco):", ['y','n'],key='nic', selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[6])
     num_meds = st.text_input("Number of medications: ",value=previous_user_inputs[7])
-    occup_danger = st.pills("How would you describe your occupational danger? (Example: Underwater welding -> High, Office work -> Low)", [1,2,3],key='occupy', selection_mode="single", format_func=risk_num_format, label_visibility="visible",default=previous_user_inputs[8])
-    ls_danger = st.pills("How would you describe your lifestyle danger? (Example: Frequent skydiving -> High, )", [1,2,3],key='ls', selection_mode="single", format_func=risk_num_format, label_visibility="visible",default=previous_user_inputs[9])
+    occup_danger = st.pills("How would you describe your occupational danger? (Example: Underwater welding -> High, Office work -> Low)", [1,2,3],key='occupy', selection_mode="single", format_func=risk_num_format, label_visibility="visible",default=str_int_workaround(previous_user_inputs[8]))
+    ls_danger = st.pills("How would you describe your lifestyle danger? (Example: Frequent skydiving -> High, )", [1,2,3],key='ls', selection_mode="single", format_func=risk_num_format, label_visibility="visible",default=str_int_workaround(previous_user_inputs[9]))
     cannabis = st.pills("Do you use cannabis, weed, or pot?", ['y','n'],key='weed', selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[10])
     opioids = st.pills("Do you use opioids?", ['y','n'],key='opioids', selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[11])
     other_drugs = st.pills("Do you use any other drugs:", ['y','n'],key='drugs', selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[12])
