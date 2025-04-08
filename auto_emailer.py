@@ -15,28 +15,69 @@ minute=60
 hour=minute*60
 day=hour*24
 
+import datetime
+import re
+
+def str_to_date(date_str):
+    """
+    Convert a string in the format "datetime.date(2003, 9, 15)"
+    to a datetime.date object.
+
+    Args:
+        date_str (str): The input string.
+
+    Returns:
+        datetime.date: The resulting date.
+
+    Raises:
+        ValueError: If the input string does not match the expected format.
+    """
+    # Define a regular expression pattern to extract the year, month, and day.
+    pattern = r"datetime\.date\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)"
+    match = re.fullmatch(pattern, date_str)
+    if not match:
+        raise ValueError("Input string is not in the expected format: 'datetime.date(YYYY, M, D)'")
+
+    year, month, day = map(int, match.groups())
+    return datetime.date(year, month, day)
+
+# Example usage:
+date_string = "datetime.date(2003, 9, 15)"
+converted_date = str_to_date(date_string)
+print(converted_date)  # Output: 2003-09-15
+
 def unwrap_string(string):
     return string[string.index("'")+1:string.index("'",string.index("'")+1)]
 
-def string_to_list(string):
+def string_to_list(string,convert_to_age=True):
     # Convert string to list
     string = string.replace('[','').replace(']','')
     string = string.split(', ')
     # Convert each element to float
     for i in range(len(string)):
         try:
-            string[i] = float(string[i])
+            string[i] = int(string[i])
         except:
             pass
-    print(string) # debug statement
-    try:
-        string=[2025-int(string[0][14:18])]+string[3:]
-    except:
-        pass
-        # Unwrap each string
+    #print(string) # debug statement
+    if convert_to_age:
+        try:
+            string=[2025-int(string[0][14:18])]+string[3:]
+        except:
+            pass
+            # Unwrap each string
+    else:
+        #print('Made it to 1')
+        string=[str_to_date(string[0]+', '+str(string[1])+', '+string[2])]+string[3:]
+        #print('Made it to 2')
     for i in range(len(string)):
         try:
             string[i]=unwrap_string(string[i])
+        except:
+            pass
+    for i in range(len(string)):
+        try:
+            string[i] = int(string[i])
         except:
             pass
     return string
@@ -168,12 +209,13 @@ def email_users(users):
     for user in users:
         email_user(user,email_password)
 
-while True:
-    users=user_list_of_dicts()
-    users=whatif_analysis(users)
-    for user in users:
-        print(user['email'])
-        print(user['subject'])
-        print(user['msg'])
-    email_users(users)
-    time.sleep(day)
+if __name__ == '__main__':
+    while True:
+        users=user_list_of_dicts()
+        users=whatif_analysis(users)
+        for user in users:
+            print(user['email'])
+            print(user['subject'])
+            print(user['msg'])
+        email_users(users)
+        time.sleep(day)
