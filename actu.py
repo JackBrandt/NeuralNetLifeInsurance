@@ -1,13 +1,22 @@
 from neural_net import load_model, NeuralNet
 from utils import policy_type_format
 
-def get_mort_tab(age,inputs,smooth=100):
+def get_mort_tab(age,inputs,smooth=100,model_print_statement=True):
+    '''Returns the mortality table for a given age and inputs
+    Args:
+        age: Age of the person
+        inputs: The parameters for the neural net prediction
+        smooth: How much to smooth the mortality table
+        print_statement: Whether to print the model statement
+    Returns:
+        mort_tab: The mortality table
+    '''
     if age<25:
         def_years=25-age
     else:
         def_years=0
     path='models/'+str(int(age+def_years))+'.pth'
-    model=load_model(path)
+    model=load_model(path,print_statement=model_print_statement)
     mort_df=model.get_life_data([inputs],False,smooth,sigma=7.5)
     mort_tab=mort_df[0].to_numpy()
     return mort_tab

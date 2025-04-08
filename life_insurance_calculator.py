@@ -1,6 +1,6 @@
 import streamlit as st
 from actu import actu_str
-from utils import policy_type_format, st_get_inputs
+from utils import policy_type_format, st_get_inputs, dob_to_age
 from cloud_storage import update_user_data_item
 # Title
 st.title("Neural Net Life Cost Predictor")
@@ -8,17 +8,6 @@ st.title("Neural Net Life Cost Predictor")
 # Main stuff
 # TODO: Replace text_input with number_input with sensible parameters (e.g., height should be positive)
 
-def dob_to_age(dob):
-    try:
-        dob=str(dob)
-        print(dob)
-        dob=dob[:4]
-        print(dob)
-        dob=int(dob)
-        print(dob)
-    except:
-        print('issue')
-    return 25
 
 inputs=st_get_inputs(st.session_state['prev_user_inputs'])
 st.write(f"You entered: {inputs}")
@@ -46,6 +35,6 @@ if st.button("Click me"):
             st.write(update_user_data_item(st.experimental_user.email,1,inputs))
         except:
             pass
-    st.write(actu_str(inputs,fv,age,policy_type,duration,payment_type,st.session_state['interest_rate']))
+    st.write(actu_str(inputs[1:],fv,age,policy_type,duration,payment_type,st.session_state['interest_rate']))
     if make_policy:
         pass

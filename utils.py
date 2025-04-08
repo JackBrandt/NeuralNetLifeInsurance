@@ -242,5 +242,17 @@ def st_get_inputs(previous_user_inputs):
             pass
     return inputs
 
+def dob_to_age(dob,default=25):
+    try:
+        dob=str(dob)
+        print(dob)
+        dob=dob[:4]
+        print(dob)
+        dob=2025-int(dob)
+        print(dob)
+    except:
+        print('issue')
+    return default
+
 if __name__ == '__main__':
     load_prep_data(25,False)

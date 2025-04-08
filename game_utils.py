@@ -51,15 +51,16 @@ def price_person(person,I):
     mort_tab=get_mort_tab(age,inputs)
     return life_liability_pv_mu(fv,I,mort_tab,0)
 
-def get_yrs_left(person):
-    person=person[1:]
+def get_yrs_left(person,contains_name=True,model_print_statement=True):
+    if contains_name:
+        person=person[1:]
     age=person[0]
     if age<25:
         def_yrs=25-age
     else:
         def_yrs=0
     inputs=person[1:]
-    mort_tab=get_mort_tab(age,inputs,50)
+    mort_tab=get_mort_tab(age,inputs,50,model_print_statement=model_print_statement)
     return years_left_mu(mort_tab,def_yrs)
 
 def get_mus(people):
