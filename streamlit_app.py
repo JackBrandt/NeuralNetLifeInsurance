@@ -34,6 +34,7 @@ if 'prev_user_inputs' not in st.session_state or 'high_score' not in st.session_
         try:
             st.session_state['prev_user_inputs']=string_to_list(user_data[1],convert_to_age=False)
         except:
+            print("Error with loading user data at startup 1")
             st.session_state['prev_user_inputs']=[None,None,None,None,None,None,None,None,
                                                 None,None,None,None,None,None,None,None,
                                                 None,None,None,None,None,None,None,None]

@@ -204,14 +204,16 @@ def get_loading_function(perm_key):
     return lambda : load_value(perm_key)
 
 def str_int_workaround(string):
+    if string is None: return None
     match string:
-        case "1.0":
+        case "1.0" |'1' | 1:
             return 1
-        case "2.0":
+        case "2.0" | '2' | 2:
             return 2
-        case "3.0":
+        case "3.0" | '3' | 3:
             return 3
         case _:
+            print(f'Unhandled case: {string}')
             raise Exception
 
 def st_get_inputs(previous_user_inputs):

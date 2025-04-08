@@ -56,7 +56,7 @@ def string_to_list(string,convert_to_age=True):
     # Convert each element to float
     for i in range(len(string)):
         try:
-            string[i] = int(string[i])
+            string[i] = float(string[i])
         except:
             pass
     #print(string) # debug statement
@@ -68,7 +68,8 @@ def string_to_list(string,convert_to_age=True):
             # Unwrap each string
     else:
         #print('Made it to 1')
-        string=[str_to_date(string[0]+', '+str(string[1])+', '+string[2])]+string[3:]
+        #print(string)
+        string=[str_to_date(string[0]+', '+str(int(string[1]))+', '+string[2])]+string[3:]
         #print('Made it to 2')
     for i in range(len(string)):
         try:
@@ -80,6 +81,9 @@ def string_to_list(string,convert_to_age=True):
             string[i] = int(string[i])
         except:
             pass
+    for i in range(len(string)):
+        if string[i]=='None':
+            string[i]=None
     return string
 
 def user_list_of_dicts():
@@ -101,12 +105,15 @@ def user_list_of_dicts():
 
 def test_change(cur_life_expec,data,change):
     data_copy=data.copy()
+    print(data_copy)
     match change[1]:
         case 'n':
             data_copy[change[2]]='n'
         case _ if change[1]<-1:
             data_copy[change[2]]=data_copy[change[2]]+change[1]
         case _:
+            print(change[1])
+            print(data_copy[change[2]])
             data_copy[change[2]]=data_copy[change[2]]-change[1]*data_copy[change[2]]
     return get_yrs_left(data_copy,contains_name=False,model_print_statement=False)-cur_life_expec
 
@@ -132,6 +139,7 @@ def find_best_change(user,user_index):
         users[user_index]['msg']='This is a test... Please fill out your data'
         return None
     # Else
+    print(user['data'])
     cur_life_expec=get_yrs_left(user['data'],contains_name=False,model_print_statement=False)
     best_change=([None,None,None],0)
     for change in changeables:
