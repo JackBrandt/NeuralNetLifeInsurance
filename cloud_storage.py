@@ -358,11 +358,11 @@ def update_user_data_item(email,item_index,item):
     user_data=load_user_data(email)
     try:
         if len(user_data)>item_index:
-        user_data[item_index]=item
-    else:
-        for _ in range(item_index+1-len(user_data)):
-            user_data.append(None)
-        user_data[item_index]=item
+            user_data[item_index]=item
+        else:
+            for _ in range(item_index+1-len(user_data)):
+                user_data.append(None)
+            user_data[item_index]=item
     except IndexError:
         if item_index>=0:
             user_data.append(item)
@@ -381,14 +381,20 @@ def get_all_users():
     return list_of_users
 
 def get_username(email):
-    data = load_user_data(email)[0]
-    print(data)
-    return data[3]
+    data = load_user_data(email)
+    print(f'Data from get_username: {data}')
+    try:
+        username=data[3]
+    except:
+        username=None
+    return username
 
 def set_username(email,new_usernmae):
     update_user_data_item(email,3,new_usernmae)
 
 def get_friends(email):
+    if email==None:
+        return
     data=load_user_data(email)[0]
     try:
         friends=data[4]

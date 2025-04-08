@@ -14,6 +14,8 @@ if st.experimental_user.get('email') is None:
         st.login()
 else:
     username = get_username(st.experimental_user.get('email'))
+    #st.write(username)
+    #st.write(st.experimental_user.get('email'))
     if username is not None:
         st.write(f'Hello {username}')
     else:

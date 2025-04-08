@@ -31,6 +31,7 @@ if 'check_options' not in st.session_state:
 if 'prev_user_inputs' not in st.session_state or 'high_score' not in st.session_state:
     try:
         user_data=load_user_data(st.experimental_user.get('email'))
+        print(user_data)
         try:
             st.session_state['prev_user_inputs']=string_to_list(user_data[1],convert_to_age=False)
         except:
