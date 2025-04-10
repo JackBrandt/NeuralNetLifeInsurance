@@ -27,6 +27,7 @@
 
 import streamlit as st
 import pandas as pd
+from cloud_storage import send_friend_request,set_friend
 
 # Initialize session state variables if they don't exist
 
@@ -37,19 +38,10 @@ def add_friend(name):
         st.session_state.current_friends.append(name)
         st.session_state.potential_friends.remove(name)
         st.success(f'{name} has been added to your friends list!')
-        save_friends_to_csv()  # Save updated lists to CSV
+         # Save updated lists to CSV
+        set_friend(st.experimental_user.get('email'),name)
     else:
         st.error('This name is not in the potential friends list.')
-
-# Function to save friends data to a CSV file
-def save_friends_to_csv():
-    data = {
-        'Current Friends': pd.Series(st.session_state.current_friends),
-        'Potential Friends': pd.Series(st.session_state.potential_friends)
-    }
-    df = pd.DataFrame(data)
-    df.to_csv('friends_data.csv', index=False)
-    st.success('Data saved to CSV file.')
 
 # Streamlit interface
 st.title('Friends Manager')
@@ -57,6 +49,12 @@ st.title('Friends Manager')
 st.header('Current Friends')
 if st.session_state.current_friends:
     st.write(", ".join(st.session_state.current_friends))
+else:
+    st.write('No friends added yet.')
+
+st.header('Pending Friends Request')
+if st.session_state.pending_friends_request:
+    st.write(", ".join(st.session_state.pending_friends_request))
 else:
     st.write('No friends added yet.')
 
@@ -70,3 +68,4 @@ st.header('Add a New Friend')
 friend_to_add = st.selectbox('Select a friend to add:', st.session_state.potential_friends)
 if st.button('Add Friend'):
     add_friend(friend_to_add)
+    send_friend_request(st.experimental_user.get('email'),friend_to_add) 

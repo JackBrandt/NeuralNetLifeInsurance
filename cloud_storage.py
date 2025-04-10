@@ -78,6 +78,14 @@ class bucket_csv_object():
             for row in reader:
                 content.append(row)
         return content
+        # content = []
+        # with self.csv_file.open('r', newline='') as f:
+        #     reader = csv.reader(f, delimiter=',')
+        #     for row in reader:
+        #         content = row  # Read only the first row
+        #         break  # Exit after the first row
+        # return content
+    
     def read_by_key(self,key):
         '''
         Searches for and retrieves rows from a CSV file in Google Cloud Storage where the first column matches a specified key. This method opens the CSV file, reads through each row, and collects rows that match the given key into a list.
@@ -109,8 +117,11 @@ class bucket_csv_object():
         with self.csv_file.open('r',newline='') as f:
             reader = csv.reader(f, delimiter=',')
             for row in reader:
-                if row[0]==key:
-                    content.append(row)
+                try:
+                    if row[0]==key:
+                        content.append(row)
+                except IndexError:
+                    pass
         if content==[]:
             content=None
         return content
@@ -162,13 +173,21 @@ class bucket_csv_object():
             - Changes are written back to the file by overwriting the existing content, and the file connection is refreshed after writing to ensure the latest state is accessible.
             - This method handles writing operations and refreshes the CSV file connection to ensure consistency.
         '''
+        if new_row=='' or new_row==[] or new_row==['']:
+            return
         existence=self.check_key_existence(new_row[0])
         current_content=self.read_all()
         if existence == True:
             for i,row in enumerate(current_content):
+                if row==[] or row==['']:
+                    current_content.remove(row)
                 #print(f'{row[0]} vs {new_row[0]}')
-                if row[0]==new_row[0]:
-                    current_content[i]=new_row # Have to do index of current_content cuz python's weird about ref. stuff
+                else:
+                    try: 
+                        if row[0]==new_row[0]:
+                            current_content[i]=new_row # Have to do index of current_content cuz python's weird about ref. stuff
+                    except:
+                        pass
         else:
             current_content.append(new_row)
         with self.csv_file.open('w',newline='') as f:
@@ -199,17 +218,17 @@ class bucket_csv_object():
         '''
         existence=self.check_key_existence(key)
         current_content=self.read_all()
-        new_content=[]
-        if existence == True:
-            for i,row in enumerate(current_content):
-                #print(f'{row[0]} vs {new_row[0]}')
-                if row[0]!=key:
-                    new_content.append(row) # Have to do index of current_content cuz python's weird about ref. stuff
-            with self.csv_file.open('w',newline='') as f:
-                writer = csv.writer(f,delimiter=',')
-                #print(current_content)
-                writer.writerows(new_content)
-                self.refresh_file()
+        # new_content=[]
+        # if existence == True:
+        #     for i,row in enumerate(current_content):
+        #         #print(f'{row[0]} vs {new_row[0]}')
+        #         if row[0]!=key:
+        #             new_content.append(row) # Have to do index of current_content cuz python's weird about ref. stuff
+        #     with self.csv_file.open('w',newline='') as f:
+        #         writer = csv.writer(f,delimiter=',')
+        #         #print(current_content)
+        #         writer.writerows(new_content)
+        #         self.refresh_file()
 
 def load_user_data(email):
     '''
@@ -330,23 +349,29 @@ def get_all_users():
     data=get_all_user_data()
     list_of_users=[]
     for user in data:
-        list_of_users.append(user[0])
+        try:
+            list_of_users.append(user[0])
+        except IndexError:
+            pass
     return list_of_users
 
 def get_username(email):
-    data = load_user_data(email)[0]
-    print(data)
-    return data[3]
+    try:
+        username = load_user_data(email)[0][3]
+    except IndexError:
+        username=None
+    return username
 
-def set_username(email,new_usernmae):
-    update_user_data_item(email,3,new_usernmae)
+def set_username(email,new_username):
+    update_user_data_item(email,3,new_username)
 
 def get_friends(email):
-    data=load_user_data(email)[0]
+    data=load_user_data(email)
+    return data
     try:
         friends=data[4]
-    except IndexError:
-        friends=None
+    except (IndexError, TypeError):
+        friends=[]
     return friends
 
 def send_friend_request(sender_email, receipient_email):
@@ -361,7 +386,7 @@ def send_friend_request(sender_email, receipient_email):
         update_user_data_item(receipient_email,5,[sender_email])
 
 def get_friend_requests(email):
-    data=load_user_data(email)[0]
+    data=load_user_data(email)
     try:
         requests=data[5]
     except IndexError:
@@ -370,12 +395,15 @@ def get_friend_requests(email):
 
 
 def set_friend(email,new_friend):
-    friends=load_user_data(email)[0][4]
-    if friends is None:
-        friends=[new_friend]
-    else:
-        friends.append(new_friend)
-    update_user_data_item(email,4,friends)
+    try: 
+        friend=load_user_data(email)[0][4]
+        if friend is None:
+            friend=[new_friend]
+        else:
+            friend.append(new_friend)
+        update_user_data_item(email,4,friend)
+    except IndexError:
+        update_user_data_item(email,4,[new_friend])
 
 if __name__ == '__main__':
     bucket=bucket_csv_object()
@@ -389,9 +417,10 @@ if __name__ == '__main__':
     bucket.delete_row('Hello world')'''
     #bucket.wipe_data()
     #bucket.write_row(['wut','wut'])
-    #print(bucket.read_all())
-    print(get_username('jbai@zagmail.gonzaga.edu'))
+    print(bucket.read_all())
+    #print(get_username('jbai@zagmail.gonzaga.edu'))
     #print(get_all_users())
+    print(f'Jiaxin\'s friends {get_friends("jbai.zagmail.gonzaga.edu")}')
     
 
 
