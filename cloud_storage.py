@@ -395,7 +395,7 @@ def set_username(email,new_usernmae):
 def get_friends(email):
     if email==None:
         return
-    data=load_user_data(email)[0]
+    data=load_user_data(email)
     try:
         friends=data[4]
     except IndexError:
@@ -414,7 +414,7 @@ def send_friend_request(sender_email, receipient_email):
         update_user_data_item(receipient_email,5,[sender_email])
 
 def get_friend_requests(email):
-    data=load_user_data(email)[0]
+    data=load_user_data(email)
     try:
         requests=data[5]
     except IndexError:
@@ -440,6 +440,8 @@ if __name__ == '__main__':
     bucket.delete_row('wut')
     print(bucket.read_by_key('wut'))
     bucket.delete_row('Hello world')'''
-    bucket.wipe_data()
+    #bucket.wipe_data()
     #bucket.write_row(['wut','wut'])
-    print(bucket.read_all())
+    #print(bucket.read_all())
+    print(f'Jiaxin\'s current friends: {get_friends('jbai@zagmail.gonzaga.edu')}')
+    print(f'Jack\'s current friend requests: {get_friend_requests('jbrandt4@zagmail.gonzaga.edu')}')

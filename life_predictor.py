@@ -14,9 +14,9 @@ life_p=life_predictor(inputs,age)
 
 def check_options():
     '''
-    Sets a Streamlit session state variable 'check_options' to True. 
-    This function is typically used as a callback linked to a 
-    Streamlit button to trigger updates or new calculations in 
+    Sets a Streamlit session state variable 'check_options' to True.
+    This function is typically used as a callback linked to a
+    Streamlit button to trigger updates or new calculations in
     the user interface after user inputs have been registered.
 
     Parameters:
@@ -29,19 +29,19 @@ def check_options():
     Usage:
         # This function is triggered by a Streamlit button.
         #  When the button is clicked, it sets the session state variable:
-        st.button('Click me after you enter your information', 
+        st.button('Click me after you enter your information',
         on_click=check_options)
         # This setup is used to enable further interactive
         #  elements in the UI based on the user's inputs.
 
     Note:
-        - The function simply sets the 'check_options' state to True, 
-        and it is assumed to be used within a logic block that 
+        - The function simply sets the 'check_options' state to True,
+        and it is assumed to be used within a logic block that
         checks this state to activate further UI elements or calculations.
-        - Ensure that this session state variable is properly handled 
-        elsewhere in your Streamlit application to perform the 
+        - Ensure that this session state variable is properly handled
+        elsewhere in your Streamlit application to perform the
         intended actions when its value is True.
-        - This function is part of a user interaction flow 
+        - This function is part of a user interaction flow
         where conditional UI elements depend on the user confirming their input.
     '''
     st.session_state['check_options']=True
@@ -50,6 +50,7 @@ possible_funcs=life_p.get_possible_funcs()
 
 st.button('Click me after you enter your information',on_click=check_options)
 if st.session_state['check_options']:
+    print(f'Inputs on life_predictor: {life_p.person}')
     st.subheader(f'Remaining life expectancy of {get_yrs_left(life_p.person):.1f} years')
     chart_data = pd.DataFrame(get_mort_tab(life_p.person[1],inputs))
     st.bar_chart(chart_data,x_label='Years from today',y_label='Probability said year is when you will die')
