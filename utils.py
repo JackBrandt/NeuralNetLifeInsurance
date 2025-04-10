@@ -203,33 +203,48 @@ def get_storage_function(perm_key):
 def get_loading_function(perm_key):
     return lambda : load_value(perm_key)
 
+def str_int_workaround(string):
+    if string is None: return None
+    match string:
+        case "1.0" |'1' | 1:
+            return 1
+        case "2.0" | '2' | 2:
+            return 2
+        case "3.0" | '3' | 3:
+            return 3
+        case _:
+            print(f'Unhandled case: {string}')
+            raise Exception
+
 def st_get_inputs(previous_user_inputs):
     st.write("Please enter your personal info and risk factors below to get started")
-    weight = st.text_input("Weight(lbs): ",value=previous_user_inputs[0])
-    sex = st.pills("Sex:", ['m','f'],key='sex', selection_mode="single", format_func=sex_format, label_visibility="visible",default=previous_user_inputs[1])
-    height = st.text_input("Height(in): ",value=previous_user_inputs[2])
-    sys_bp = st.text_input("Sys_BP: ",value=previous_user_inputs[3])
-    smoker = st.pills("Do you smoke:", ['y','n'],key='smoke', selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[4])
-    nic_other = st.pills("Do you use other forms of nicotine? (e.g., vape or chewing tobacco):", ['y','n'],key='nic', selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[5])
-    num_meds = st.text_input("Number of medications: ",value=previous_user_inputs[6])
-    occup_danger = st.pills("How would you describe your occupational danger? (Example: Underwater welding -> High, Office work -> Low)", [1,2,3],key='occupy', selection_mode="single", format_func=risk_num_format, label_visibility="visible",default=previous_user_inputs[7])
-    ls_danger = st.pills("How would you describe your lifestyle danger? (Example: Frequent skydiving -> High, )", [1,2,3],key='ls', selection_mode="single", format_func=risk_num_format, label_visibility="visible",default=previous_user_inputs[8])
-    cannabis = st.pills("Do you use cannabis, weed, or pot?", ['y','n'],key='weed', selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[9])
-    opioids = st.pills("Do you use opioids?", ['y','n'],key='opioids', selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[10])
-    other_drugs = st.pills("Do you use any other drugs:", ['y','n'],key='drugs', selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[11])
-    drinks_aweek = st.text_input("Drinks per week: ",value=previous_user_inputs[12])
-    addiction = st.pills("Do you have a history of addiction?", ['y','n'],key='addict', selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[13])
-    major_surgery_num = st.text_input("Number of major surgeries: ",value=previous_user_inputs[14])
-    diabetes = st.pills("Do you have diabetes?", ['y','n'],key='diab', selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[15])
-    hds = st.pills("Do you have a history of heart disease or stroke?", ['y','n'],key='hds', selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[16])
-    cholesterol = st.text_input("Cholesterol: ",value=previous_user_inputs[17])
-    asthma = st.pills("Do you have asthma?", ['y','n'], selection_mode="single",key='asthma', format_func=yn_format, label_visibility="visible",default=previous_user_inputs[18])
-    immune_defic = st.pills("Do you have an immune deficiency?", ['y','n'],key='immune', selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[19])
-    family_cancer = st.pills("Do you have a family history of cancer?", ['y','n'],key='cancer', selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[20])
-    family_heart_disease = st.pills("Do you have a family history of heart disease or stroke?", ['y','n'], key='familyhds',selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[21])
-    family_cholesterol = st.pills("Do you have a family history of high cholesterol?", ['y','n'],key='chol', selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[22])
+    st.write(previous_user_inputs)
+    dob = st.date_input("Date of birth",value=previous_user_inputs[0],format="MM/DD/YYYY")
+    weight = st.text_input("Weight(lbs): ",value=previous_user_inputs[1])
+    sex = st.pills("Sex:", ['m','f'],key='sex', selection_mode="single", format_func=sex_format, label_visibility="visible",default=previous_user_inputs[2])
+    height = st.text_input("Height(in): ",value=previous_user_inputs[3])
+    sys_bp = st.text_input("Sys_BP: ",value=previous_user_inputs[4])
+    smoker = st.pills("Do you smoke:", ['y','n'],key='smoke', selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[5])
+    nic_other = st.pills("Do you use other forms of nicotine? (e.g., vape or chewing tobacco):", ['y','n'],key='nic', selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[6])
+    num_meds = st.text_input("Number of medications: ",value=previous_user_inputs[7])
+    occup_danger = st.pills("How would you describe your occupational danger? (Example: Underwater welding -> High, Office work -> Low)", [1,2,3],key='occupy', selection_mode="single", format_func=risk_num_format, label_visibility="visible",default=str_int_workaround(previous_user_inputs[8]))
+    ls_danger = st.pills("How would you describe your lifestyle danger? (Example: Frequent skydiving -> High, )", [1,2,3],key='ls', selection_mode="single", format_func=risk_num_format, label_visibility="visible",default=str_int_workaround(previous_user_inputs[9]))
+    cannabis = st.pills("Do you use cannabis, weed, or pot?", ['y','n'],key='weed', selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[10])
+    opioids = st.pills("Do you use opioids?", ['y','n'],key='opioids', selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[11])
+    other_drugs = st.pills("Do you use any other drugs:", ['y','n'],key='drugs', selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[12])
+    drinks_aweek = st.text_input("Drinks per week: ",value=previous_user_inputs[13])
+    addiction = st.pills("Do you have a history of addiction?", ['y','n'],key='addict', selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[14])
+    major_surgery_num = st.text_input("Number of major surgeries: ",value=previous_user_inputs[15])
+    diabetes = st.pills("Do you have diabetes?", ['y','n'],key='diab', selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[16])
+    hds = st.pills("Do you have a history of heart disease or stroke?", ['y','n'],key='hds', selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[17])
+    cholesterol = st.text_input("Cholesterol: ",value=previous_user_inputs[18])
+    asthma = st.pills("Do you have asthma?", ['y','n'], selection_mode="single",key='asthma', format_func=yn_format, label_visibility="visible",default=previous_user_inputs[19])
+    immune_defic = st.pills("Do you have an immune deficiency?", ['y','n'],key='immune', selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[20])
+    family_cancer = st.pills("Do you have a family history of cancer?", ['y','n'],key='cancer', selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[21])
+    family_heart_disease = st.pills("Do you have a family history of heart disease or stroke?", ['y','n'], key='familyhds',selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[22])
+    family_cholesterol = st.pills("Do you have a family history of high cholesterol?", ['y','n'],key='chol', selection_mode="single", format_func=yn_format, label_visibility="visible",default=previous_user_inputs[23])
     inputs = [
-        weight, sex, height, sys_bp, smoker, nic_other, num_meds, occup_danger,
+        dob, weight, sex, height, sys_bp, smoker, nic_other, num_meds, occup_danger,
         ls_danger, cannabis, opioids, other_drugs, drinks_aweek, addiction,
         major_surgery_num, diabetes, hds, cholesterol, asthma, immune_defic,
         family_cancer, family_heart_disease, family_cholesterol
@@ -240,6 +255,18 @@ def st_get_inputs(previous_user_inputs):
         except:
             pass
     return inputs
+
+def dob_to_age(dob,default=25):
+    try:
+        dob=str(dob)
+        print(dob)
+        dob=dob[:4]
+        print(dob)
+        dob=2025-int(dob)
+        print(dob)
+    except:
+        print('issue')
+    return default
 
 if __name__ == '__main__':
     load_prep_data(25,False)

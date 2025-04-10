@@ -9,7 +9,7 @@ from utils import gaussian_smooth,load_prep_data
 from sklearn.preprocessing import StandardScaler
 from utils import get_life_inputs, convert_to_binary
 
-def load_model(filepath: str):
+def load_model(filepath: str, print_statement=True) -> nn.Module:
     """
     Load a saved PyTorch model from disk and set it to evaluation mode.
 
@@ -24,44 +24,45 @@ def load_model(filepath: str):
     """
     model = torch.load(filepath, weights_only=False)
     model.eval()  # Set model to evaluation mode
-    print(f"Model loaded from {filepath}")
+    if print_statement:
+        print(f"Model loaded from {filepath}")
     return model
 
 class NeuralNet(nn.Module):
     def __init__(self,age):
         '''
-        Initializes an instance of the NeuralNet class, setting up the architecture of the 
-        neural network for multi-class classification. 
-        This network includes two linear layers with ReLU activation for the first layer and 
+        Initializes an instance of the NeuralNet class, setting up the architecture of the
+        neural network for multi-class classification.
+        This network includes two linear layers with ReLU activation for the first layer and
         Softmax for the output layer. The output layer's
-        number of neurons dynamically adjusts based on the `age` parameter. The constructor 
+        number of neurons dynamically adjusts based on the `age` parameter. The constructor
         also sets up the optimizer, loss function, batch size, and feature scaler.
 
         Parameters:
-            age (int): Age parameter influences the number of neurons in the output layer. 
-            Specifically, the number of output neurons is calculated as `96 - (age - 25)`. 
-            This design assumes that the age input directly correlates with the desired 
+            age (int): Age parameter influences the number of neurons in the output layer.
+            Specifically, the number of output neurons is calculated as `96 - (age - 25)`.
+            This design assumes that the age input directly correlates with the desired
             complexity or capacity of the model's output layer.
 
         Attributes:
             fc1 (nn.Linear): First hidden layer with 23 input features and 10 output neurons.
-            fc2 (nn.Linear): Dynamically adjusted second/output layer with 10 input neurons 
+            fc2 (nn.Linear): Dynamically adjusted second/output layer with 10 input neurons
             and a variable number of output neurons based on the `age` parameter.
             relu (nn.ReLU): ReLU activation function applied after the first hidden layer.
-            softmax (nn.Softmax): Softmax activation function applied to the output of 
+            softmax (nn.Softmax): Softmax activation function applied to the output of
             the second layer, facilitating multi-class classification.
             optimizer (optim.Adam): Adam optimizer with a learning rate of 0.001, used for
               updating the weights and biases of the network during training.
             criterion (nn.CrossEntropyLoss): Loss function used for multi-class classification.
-            batch_size (int): Specifies the number of samples in each batch to be fed to 
+            batch_size (int): Specifies the number of samples in each batch to be fed to
             the network during training (32 by default).
-            scaler (StandardScaler): Feature scaler for normalizing/standardizing 
+            scaler (StandardScaler): Feature scaler for normalizing/standardizing
             the inputs to the network.
-            cols (list): List to store column names or other relevant metadata, 
+            cols (list): List to store column names or other relevant metadata,
             initialized as an empty list.
 
         Returns:
-            None: This constructor method does not return any value but 
+            None: This constructor method does not return any value but
             initializes the neural network's components.
         '''
         super(NeuralNet, self).__init__()
@@ -79,22 +80,22 @@ class NeuralNet(nn.Module):
     def forward(self, x):
         '''
         Propagates the input through the neural network model. The input data passes through
-        the first linear layer followed by a ReLU activation function. 
-        The second linear layer then processes the result, 
-        and a Softmax function is applied to the output of the second layer 
+        the first linear layer followed by a ReLU activation function.
+        The second linear layer then processes the result,
+        and a Softmax function is applied to the output of the second layer
         to generate probability distributions for the classes.
 
         Parameters:
-            x (Tensor): The input data tensor that needs to be processed 
-            by the neural network. 
+            x (Tensor): The input data tensor that needs to be processed
+            by the neural network.
             This should have the appropriate shape expected by the
               first linear layer (nn.Linear(23, 10)).
 
         Returns:
             Tensor: A tensor containing the softmax output of the network,
-              representing probability distributions over the classes. 
-            The shape of the output tensor depends on the input and 
-            the dynamic configuration of the second layer 
+              representing probability distributions over the classes.
+            The shape of the output tensor depends on the input and
+            the dynamic configuration of the second layer
             (determined by the `age` parameter set during initialization).
         '''
         x = self.relu(self.fc1(x))
@@ -104,10 +105,10 @@ class NeuralNet(nn.Module):
 
     def save_model(self):
         '''
-        Saves the current state of the neural network model to a file. 
-        The filename is determined by the configuration of the 
-        neural network's output layer. 
-        Specifically, the filename encodes the age parameter that 
+        Saves the current state of the neural network model to a file.
+        The filename is determined by the configuration of the
+        neural network's output layer.
+        Specifically, the filename encodes the age parameter that
         influences the output layer's neuron count, allowing for
           the identification and reuse of model configurations tailored to specific age values.
 
@@ -130,18 +131,18 @@ class NeuralNet(nn.Module):
         age=25+96-self.fc2.out_features
         filepath='models/'+str(age)+'.pth'
         torch.save(self, filepath)  # Save model parameters
-        print(f"Model saved to {filepath}")
+        #print(f"Model saved to {filepath}")
 
     # Training loop
     def neural_net_train(self,train_loader, epoch=1, print_statement=True):
         '''
         Trains the neural network using the provided training data loader.
-          This method runs through the dataset for a specified number of epochs, 
-        performing forward passes, loss computation, and backpropagation 
+          This method runs through the dataset for a specified number of epochs,
+        performing forward passes, loss computation, and backpropagation
         for weights updates. Additionally, it prints the loss after each epoch if requested.
 
         Parameters:
-            train_loader (DataLoader): The DataLoader instance that provides 
+            train_loader (DataLoader): The DataLoader instance that provides
             batches of training data tuples (inputs, labels).
             epoch (int, optional): The number of epochs to train the network for.
               Defaults to 1.
@@ -149,7 +150,7 @@ class NeuralNet(nn.Module):
               printing of loss after each epoch. Defaults to True.
 
         Returns:
-            None: This function does not return any value but prints the 
+            None: This function does not return any value but prints the
             training loss and completion status if `print_statement` is True.
 
         Usage:
@@ -179,25 +180,25 @@ class NeuralNet(nn.Module):
     def neural_net_eval(self,test_loader):
         '''
         Evaluates the neural network model on a given dataset using
-          mean absolute error as the metric. 
-        This method sets the model to evaluation mode, iterates through 
-        the provided DataLoader, computes errors for each batch, 
+          mean absolute error as the metric.
+        This method sets the model to evaluation mode, iterates through
+        the provided DataLoader, computes errors for each batch,
         and finally calculates the average of these errors across
           all batches as the mean mean absolute error.
 
         Parameters:
-            test_loader (DataLoader): The DataLoader containing the test dataset. 
+            test_loader (DataLoader): The DataLoader containing the test dataset.
             It should provide batches of data in the form of (inputs, labels) tuples.
 
         Returns:
-            None: This method does not return any value. Instead, 
-            it prints the calculated mean mean absolute error 
+            None: This method does not return any value. Instead,
+            it prints the calculated mean mean absolute error
             after evaluating the entire test dataset.
 
         Side Effects:
-            - Sets the model to evaluation mode to disable dropout 
+            - Sets the model to evaluation mode to disable dropout
             and batch normalization during inference.
-            - Prints the mean mean absolute error, which is an average of 
+            - Prints the mean mean absolute error, which is an average of
             the mean absolute errors across all samples in each batch.
 
         Usage:
@@ -207,11 +208,11 @@ class NeuralNet(nn.Module):
 
         Note:
             - The function assumes the outputs and labels are
-              in compatible formats for direct subtraction to calculate the absolute error. 
-            Adjustments may be needed depending on the 
+              in compatible formats for direct subtraction to calculate the absolute error.
+            Adjustments may be needed depending on the
             specific output format of your model.
-            - This method directly prints the results, which might not be ideal for all use cases. 
-            Consider modifying the function to return the error 
+            - This method directly prints the results, which might not be ideal for all use cases.
+            Consider modifying the function to return the error
             if it needs to be used programmatically.
         '''
         self.eval()  # Set to evaluation mode
@@ -239,24 +240,24 @@ class NeuralNet(nn.Module):
     def train_eval_save(self, reps, epoch, eval_always=True):
         '''
         This method orchestrates the complete process of training, evaluating,
-          and saving the neural network model. 
+          and saving the neural network model.
         It first loads and prepares the data, then repeatedly trains the network,
-          evaluates it, and saves the state, according to the specified parameters. 
-        It is designed to facilitate multiple iterations of 
+          evaluates it, and saves the state, according to the specified parameters.
+        It is designed to facilitate multiple iterations of
         training and evaluation to refine the model's performance.
 
         Parameters:
             reps (int): The number of repetitions of the training and evaluation cycles.
-            epoch (int): The number of epochs for which 
+            epoch (int): The number of epochs for which
             the network should be trained in each repetition.
-            eval_always (bool, optional): Determines whether to 
-            evaluate the model after every training repetition. 
+            eval_always (bool, optional): Determines whether to
+            evaluate the model after every training repetition.
             If set to False, the model is only evaluated after
               the final repetition. Defaults to True.
 
         Returns:
-            DataLoader: Returns the test DataLoader used in the evaluations. 
-            This can be useful for further testing or verification 
+            DataLoader: Returns the test DataLoader used in the evaluations.
+            This can be useful for further testing or verification
             after the function has completed.
 
         Usage:
@@ -267,12 +268,12 @@ class NeuralNet(nn.Module):
         Notes:
             - The data is loaded and preprocessed from a specified CSV file.
               The number of features and the target setup in this CSV should
-                match the expected input size 
+                match the expected input size
             and output configuration of the neural network.
-            - Each repetition consists of training for the specified number of epochs, 
+            - Each repetition consists of training for the specified number of epochs,
             an optional evaluation, and a model save operation.
-            - The function uses 'data.csv' to load the data, 
-            and it adjusts preprocessing parameters based 
+            - The function uses 'data.csv' to load the data,
+            and it adjusts preprocessing parameters based
             on the neural network's current configuration.
         '''
         X_train, X_test, y_train, y_test, self.scaler, self.cols = load_prep_data('data.csv',25+(96-self.fc2.out_features))
@@ -289,27 +290,27 @@ class NeuralNet(nn.Module):
 
     def train_save(self, reps, epoch):
         '''
-        This method handles the training of the neural network 
-        for a specified number of repetitions and epochs, 
+        This method handles the training of the neural network
+        for a specified number of repetitions and epochs,
         saving the model after each complete training cycle.
-          It dynamically adjusts the learning rate based on the size of 
+          It dynamically adjusts the learning rate based on the size of
           the training data to optimize training efficiency.
 
         Parameters:
-            reps (int): The number of complete training cycles to perform. 
-            Each cycle includes training the network for the specified number 
+            reps (int): The number of complete training cycles to perform.
+            Each cycle includes training the network for the specified number
             of epochs and then saving the model.
             epoch (int): The number of epochs to train the network in each repetition.
 
         Returns:
-            None: This method does not return any value. It performs 
+            None: This method does not return any value. It performs
             training and saves the model state to disk after each repetition.
 
         Side Effects:
-            - Prints the length of the training dataset and the 
+            - Prints the length of the training dataset and the
             calculated learning rate adjustment factor.
             - Saves the model to disk after each training cycle.
-            - Adjusts the learning rate of the optimizer dynamically 
+            - Adjusts the learning rate of the optimizer dynamically
             based on the size of the training dataset.
 
         Usage:
@@ -317,13 +318,13 @@ class NeuralNet(nn.Module):
             >>> neural_network_instance.train_save(reps=3, epoch=10)
 
         Notes:
-            - The data is loaded and preprocessed by `load_prep_data` 
+            - The data is loaded and preprocessed by `load_prep_data`
             which is configured to omit the test split when `test=False` is specified.
-            - The learning rate is calculated as 
-            `0.001 * ((10000 / len(X_train)) ** 0.5)`, 
+            - The learning rate is calculated as
+            `0.001 * ((10000 / len(X_train)) ** 0.5)`,
             adjusting it based on the training set size to
               maintain effective learning speeds.
-            - Ensure that the batch size and other training parameters 
+            - Ensure that the batch size and other training parameters
             are properly set before calling this function.
         '''
         X_train, y_train, self.scaler, self.cols = load_prep_data(25+(96-self.fc2.out_features),test=False)
@@ -338,27 +339,27 @@ class NeuralNet(nn.Module):
 
     def get_life_data(self, inputs=None, is_tensor=False,smooth_percentage=0,sigma=5):
         '''
-        Retrieves and processes life data inputs to generate model predictions. 
+        Retrieves and processes life data inputs to generate model predictions.
         This function allows for optional smoothing of the output data
           based on specified parameters.
 
         Parameters:
-            inputs (array-like or Tensor, optional): The input data to be used for predictions. 
+            inputs (array-like or Tensor, optional): The input data to be used for predictions.
             If not provided, the function fetches the inputs using the `get_life_inputs` method.
             is_tensor (bool, optional): Specifies whether the provided `inputs` are
               already in tensor format. Defaults to False.
             smooth_percentage (int, optional): The percentage of the output
               to be smoothed using a Gaussian function. Defaults to 0, indicating no smoothing.
-            sigma (int, optional): The standard deviation for the Gaussian smoothing function. 
+            sigma (int, optional): The standard deviation for the Gaussian smoothing function.
             Only relevant if `smooth_percentage` is greater than 0. Defaults to 5.
 
         Returns:
-            DataFrame or Tensor: Returns a DataFrame or Tensor containing the model predictions. 
-            If `smooth_percentage` is specified, the output 
+            DataFrame or Tensor: Returns a DataFrame or Tensor containing the model predictions.
+            If `smooth_percentage` is specified, the output
             will be a smoothed version of the predictions.
 
         Side Effects:
-            - Transforms input data into a DataFrame (if not already a tensor), applies conversions, 
+            - Transforms input data into a DataFrame (if not already a tensor), applies conversions,
             and standardizes using the pre-fitted scaler.
             - Evaluates the model in non-training mode and with no gradient calculations.
             - Optionally applies Gaussian smoothing to the predictions based on the `smooth_percentage`.
@@ -368,13 +369,13 @@ class NeuralNet(nn.Module):
             >>> predictions = neural_network_instance.get_life_data(inputs=my_data)
 
             # To get predictions with 20% Gaussian smoothing:
-            >>> smoothed_predictions = 
+            >>> smoothed_predictions =
             neural_network_instance.get_life_data(inputs=my_data, smooth_percentage=20, sigma=3)
 
         Note:
-            - The function automatically handles the conversion of non-tensor 
+            - The function automatically handles the conversion of non-tensor
             inputs into the appropriate tensor format needed for model prediction.
-            - The range for the index of the output DataFrame is 
+            - The range for the index of the output DataFrame is
             dynamically calculated based on the configuration of the model's output layer.
         '''
         if inputs is None:
@@ -409,7 +410,7 @@ def make_all_models(age_cap: int):
       ranging from 25 up to a specified age cap. Each model is saved after training.
 
     Parameters:
-        age_cap (int): The maximum age for which to create and train models. 
+        age_cap (int): The maximum age for which to create and train models.
         Models will be created for every year starting from 25 up to (but not including) this age.
 
     Returns:

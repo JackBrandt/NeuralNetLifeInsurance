@@ -1,6 +1,9 @@
 # Imports the Google Cloud client library
 from google.cloud import storage
 import csv
+import os
+import ast
+#import streamlit as st
 
 class bucket_csv_object():
     def __init__(self,bucket_name='bucket-quickstart_snappy-rainfall-454116-t5',csv_name='users.csv'):
@@ -76,7 +79,9 @@ class bucket_csv_object():
         with self.csv_file.open('r',newline='') as f:
             reader = csv.reader(f, delimiter=',')
             for row in reader:
-                content.append(row)
+                #print(row)
+                if row!=[]:
+                    content.append(row)
         return content
         # content = []
         # with self.csv_file.open('r', newline='') as f:
@@ -120,7 +125,7 @@ class bucket_csv_object():
                 try:
                     if row[0]==key:
                         content.append(row)
-                except IndexError:
+                except:
                     pass
         if content==[]:
             content=None
@@ -182,12 +187,11 @@ class bucket_csv_object():
                 if row==[] or row==['']:
                     current_content.remove(row)
                 #print(f'{row[0]} vs {new_row[0]}')
-                else:
-                    try: 
-                        if row[0]==new_row[0]:
-                            current_content[i]=new_row # Have to do index of current_content cuz python's weird about ref. stuff
-                    except:
-                        pass
+                try:
+                    if row[0]==new_row[0]:
+                        current_content[i]=new_row # Have to do index of current_content cuz python's weird about ref. stuff
+                except:
+                    pass
         else:
             current_content.append(new_row)
         with self.csv_file.open('w',newline='') as f:
@@ -218,17 +222,26 @@ class bucket_csv_object():
         '''
         existence=self.check_key_existence(key)
         current_content=self.read_all()
-        # new_content=[]
-        # if existence == True:
-        #     for i,row in enumerate(current_content):
-        #         #print(f'{row[0]} vs {new_row[0]}')
-        #         if row[0]!=key:
-        #             new_content.append(row) # Have to do index of current_content cuz python's weird about ref. stuff
-        #     with self.csv_file.open('w',newline='') as f:
-        #         writer = csv.writer(f,delimiter=',')
-        #         #print(current_content)
-        #         writer.writerows(new_content)
-        #         self.refresh_file()
+        new_content=[]
+        if existence == True:
+            for i,row in enumerate(current_content):
+                #print(f'{row[0]} vs {new_row[0]}')
+                if row[0]!=key:
+                    new_content.append(row) # Have to do index of current_content cuz python's weird about ref. stuff
+            with self.csv_file.open('w',newline='') as f:
+                writer = csv.writer(f,delimiter=',')
+                #print(current_content)
+                writer.writerows(new_content)
+                self.refresh_file()
+    def wipe_data(self):
+        confirmation=input("Do you really want to wipe all user data? (Y/n)")
+        if confirmation=='Y':
+            confirmation=input('Are you sure? (Y/n)')
+            if confirmation=='Y':
+                with self.csv_file.open('w',newline='') as f:
+                    writer = csv.writer(f,delimiter=',')
+                    writer.writerows([''])
+                    self.refresh_file
 
 def load_user_data(email):
     '''
@@ -252,11 +265,28 @@ def load_user_data(email):
         - Ensure that appropriate permissions and configurations are set up for accessing and modifying the CSV file in the storage bucket.
         - This method could be expanded to handle more complex user data structures or multiple fields by modifying the initialization of new user data.
     '''
+    if email=='' or email==None:
+        return
     bucket=bucket_csv_object()
     user_data=bucket.read_by_key(email)
     if user_data==None:
-        user_data=[email]
+        user_data=[email,[None,None,None,None,None,None,None,None,
+                          None,None,None,None,None,None,None,None,
+                          None,None,None,None,None,None,None,None]]
         bucket.write_row(user_data)
+    else:
+        user_data=user_data[0]
+    try:
+        user_data[1]=ast.literal_eval(user_data[1])
+    except:
+        pass
+    #for i,value in enumerate(user_data[1]):
+    #    if value=='None':
+    #        user_data[1][i]=None
+    try:
+        user_data[2]=float(user_data[2])
+    except:
+        pass
     return user_data
 
 def unload_user_data(user_data):
@@ -281,8 +311,10 @@ def unload_user_data(user_data):
         - Nullifying the local variable within the function may not clear it from the calling scope, depending on how the variable is managed in the broader application.
     '''
     bucket=bucket_csv_object()
+    if user_data[0]=='' or user_data[0]==None:
+        return
     bucket.write_row(user_data)
-    user_data=None
+    return None
 
 def write_user_data(updated_data):
     '''
@@ -305,10 +337,14 @@ def write_user_data(updated_data):
         - The `write_row` method of `bucket_csv_object` handles the determination of whether to update an existing row or append a new row based on the first element of the `updated_data` list.
         - Consider implementing error handling within `bucket_csv_object` to manage potential issues during file operations, such as network failures or permission errors.
     '''
+    if updated_data[0]=='' or updated_data[0]==None:
+        return
     bucket=bucket_csv_object()
     bucket.write_row(updated_data)
 
 def update_user_data_item(email,item_index,item):
+    if email=='' or email==None:
+        return
     '''
     Updates a specific item in a user's data row in a CSV file. The function first loads the user's data based on the provided email, modifies the data at the specified index, writes the updated data back to the CSV file, and then returns the updated data.
 
@@ -331,13 +367,17 @@ def update_user_data_item(email,item_index,item):
         - If the specified index is out of the range of the user data list, this will result in an IndexError. Ensure the index is valid for the length of the user data list.
         - It is crucial to handle data integrity and ensure that the updates are appropriately managed, especially in environments where multiple accesses might occur concurrently.
     '''
-    user_data=load_user_data(email)[0]
-    if len(user_data)>item_index:
-        user_data[item_index]=item
-    else:
-        for _ in range(item_index+1-len(user_data)):
-            user_data.append(None)
-        user_data[item_index]=item
+    user_data=load_user_data(email)
+    try:
+        if len(user_data)>item_index:
+            user_data[item_index]=item
+        else:
+            for _ in range(item_index+1-len(user_data)):
+                user_data.append(None)
+            user_data[item_index]=item
+    except IndexError:
+        if item_index>=0:
+            user_data.append(item)
     write_user_data(user_data)
     return user_data
 
@@ -356,9 +396,11 @@ def get_all_users():
     return list_of_users
 
 def get_username(email):
+    data = load_user_data(email)
+    print(f'Data from get_username: {data}')
     try:
-        username = load_user_data(email)[0][3]
-    except IndexError:
+        username=data[3]
+    except:
         username=None
     return username
 
@@ -366,8 +408,9 @@ def set_username(email,new_username):
     update_user_data_item(email,3,new_username)
 
 def get_friends(email):
+    if email==None:
+        return
     data=load_user_data(email)
-    return data
     try:
         friends=data[4]
     except (IndexError, TypeError):
@@ -375,7 +418,7 @@ def get_friends(email):
     return friends
 
 def send_friend_request(sender_email, receipient_email):
-    try: 
+    try:
         requests=load_user_data(receipient_email)[0][5]
         if requests is None:
             requests=[sender_email]
@@ -417,10 +460,6 @@ if __name__ == '__main__':
     bucket.delete_row('Hello world')'''
     #bucket.wipe_data()
     #bucket.write_row(['wut','wut'])
-    print(bucket.read_all())
-    #print(get_username('jbai@zagmail.gonzaga.edu'))
-    #print(get_all_users())
-    print(f'Jiaxin\'s friends {get_friends("jbai.zagmail.gonzaga.edu")}')
-    
-
-
+    #print(bucket.read_all())
+    print(f'Jiaxin\'s current friends: {get_friends('jbai@zagmail.gonzaga.edu')}')
+    print(f'Jack\'s current friend requests: {get_friend_requests('jbrandt4@zagmail.gonzaga.edu')}')
