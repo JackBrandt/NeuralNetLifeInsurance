@@ -397,7 +397,7 @@ def get_friends(email):
         return
     data=load_user_data(email)
     try:
-        friends=data[4]
+        friends=convert_string_to_list(data[4])
     except IndexError:
         friends=None
     return friends
@@ -416,7 +416,7 @@ def send_friend_request(sender_email, receipient_email):
 def get_friend_requests(email):
     data=load_user_data(email)
     try:
-        requests=data[5]
+        requests=convert_string_to_list(data[5])
     except IndexError:
         requests=None
     return requests
@@ -429,6 +429,32 @@ def set_friend(email,new_friend):
     else:
         friends.append(new_friend)
     update_user_data_item(email,4,friends)
+
+
+def convert_string_to_list(string):
+    """
+    Convert a string representation of a list into an actual Python list.
+
+    Parameters:
+        string (str): A string that represents a Python list. Example: "['jbai@zagmail.gonzaga.edu']"
+
+    Returns:
+        list: The resulting Python list.
+
+    Raises:
+        ValueError: If the string cannot be safely converted to a list.
+    """
+    try:
+        # Safely evaluate the string expression to a Python object
+        result = ast.literal_eval(string)
+
+        # Verify that the result is indeed a list
+        if isinstance(result, list):
+            return result
+        else:
+            raise ValueError("Input string does not evaluate to a list")
+    except (SyntaxError, ValueError) as e:
+        raise ValueError("Failed to convert string to list. Please check the input format.") from e
 
 if __name__ == '__main__':
     bucket=bucket_csv_object()
@@ -445,3 +471,4 @@ if __name__ == '__main__':
     #print(bucket.read_all())
     print(f'Jiaxin\'s current friends: {get_friends('jbai@zagmail.gonzaga.edu')}')
     print(f'Jack\'s current friend requests: {get_friend_requests('jbrandt4@zagmail.gonzaga.edu')}')
+    print(type(get_friends('jbai@zagmail.gonzaga.edu')))
