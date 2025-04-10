@@ -461,5 +461,5 @@ if __name__ == '__main__':
     #bucket.wipe_data()
     #bucket.write_row(['wut','wut'])
     #print(bucket.read_all())
-    print(f'Jiaxin\'s current friends: {get_friends('jbai@zagmail.gonzaga.edu')}')
-    print(f'Jack\'s current friend requests: {get_friend_requests('jbrandt4@zagmail.gonzaga.edu')}')
+    print(f'Jiaxin\'s current friends: {get_friends("jbai@zagmail.gonzaga.edu")}')
+    print(f'Jack\'s current friend requests: {get_friend_requests("jbrandt4@zagmail.gonzaga.edu")}')
