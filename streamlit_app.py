@@ -51,6 +51,9 @@ if 'prev_user_inputs' not in st.session_state or 'high_score' not in st.session_
         st.session_state['high_score']=0
 if 'current_friends' not in st.session_state:
     st.session_state.current_friends = get_friends(st.experimental_user.get('email'))
+    print()
+    print('current friends')
+    print(st.session_state.current_friends)
 if 'potential_friends' not in st.session_state:
     st.session_state.potential_friends = get_all_users()
 if 'pending_friends_request' not in st.session_state:
