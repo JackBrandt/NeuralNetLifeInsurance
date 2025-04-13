@@ -23,6 +23,7 @@ else:
         new_username = st.text_input('Create an username')
         if st.button("Set username"):
             set_username(st.experimental_user.get('email'),new_username)
+            st.rerun()
     if st.button("Log out"):
         st.logout()
 

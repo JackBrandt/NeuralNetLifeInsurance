@@ -5,6 +5,9 @@ import os
 import ast
 #import streamlit as st
 
+
+
+
 class bucket_csv_object():
     def __init__(self,bucket_name='bucket-quickstart_snappy-rainfall-454116-t5',csv_name='users.csv'):
         '''
@@ -52,6 +55,9 @@ class bucket_csv_object():
         self.storage_client = storage.Client()
         self.bucket = self.storage_client.bucket(self.bucket_name)
         self.csv_file = self.bucket.blob(self.csv_name)
+
+
+
     def read_all(self):
         '''
         Reads all the data from the specified CSV file in the Google Cloud Storage bucket and returns it as a list. This method opens the CSV file for reading, iterates through all rows in the file, and collects them into a list.
@@ -82,6 +88,7 @@ class bucket_csv_object():
                 #print(row)
                 if row!=[]:
                     content.append(row)
+
         return content
     def read_by_key(self,key):
         '''
@@ -423,11 +430,20 @@ def get_friend_requests(email):
 
 
 def set_friend(email,new_friend):
-    friends=load_user_data(email)[0][4]
-    if friends is None:
-        friends=[new_friend]
-    else:
-        friends.append(new_friend)
+    try:
+        friends=load_user_data(email)[4]
+    except IndexError:
+        friends=None
+    print(friends)
+    try:
+        if friends is None:
+            friends=[new_friend]
+        elif friends == '' or friends == 'None':
+            friends=[new_friend]
+        else:
+            friends.append(new_friend)
+    except AttributeError:
+        friends=[friends,new_friend]
     update_user_data_item(email,4,friends)
 
 
@@ -458,17 +474,11 @@ def convert_string_to_list(string):
 
 if __name__ == '__main__':
     bucket=bucket_csv_object()
-    '''print(bucket.read_all())
-    print(bucket.check_key_existence('Key'))
-    bucket.write_row(['Hello world','It is me'])
-    bucket.write_row(['wut','wut'])
     print(bucket.read_all())
-    bucket.delete_row('wut')
-    print(bucket.read_by_key('wut'))
-    bucket.delete_row('Hello world')'''
-    #bucket.wipe_data()
-    #bucket.write_row(['wut','wut'])
-    #print(bucket.read_all())
-    print(f'Jiaxin\'s current friends: {get_friends('jbai@zagmail.gonzaga.edu')}')
-    print(f'Jack\'s current friend requests: {get_friend_requests('jbrandt4@zagmail.gonzaga.edu')}')
-    print(type(get_friends('jbai@zagmail.gonzaga.edu')))
+    bucket.wipe_data()
+    print(bucket.read_all())
+
+    print(f'Jack\'s current friends: {get_friends('superengineerdude@gmail.com')}.')
+    set_friend('superengineerdude@gmail.com','jbrandt4@zagmail.gonzaga')
+    print(f'Jack\'s current friends: {get_friends('superengineerdude@gmail.com')}.')
+    print(bucket.read_all())
