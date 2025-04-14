@@ -284,6 +284,9 @@ def string_to_list(string,starts_with_date=False):
             string=[str_to_date(string[0]+', '+str(int(string[1]))+', '+string[2])]+string[3:]
         except:
             pass
+    for i,sub in enumerate(string):
+        if sub=='None':
+            string[i]=None
     return string
 
 def load_user_data(email):

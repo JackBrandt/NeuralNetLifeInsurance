@@ -16,8 +16,11 @@ life_predictor = st.Page('life_predictor.py',title='Life Predictor', icon='🧮'
 death_predictor = st.Page("death_predictor.py",title="Death Predictor Game",icon='🎮')
 settings = st.Page("settings.py",title="Settings",icon='⚙️')
 friends = st.Page("friends.py",title='Friends',icon='😎')
+privacy_agreement = st.Page("privacy_agreement.py",title='User Privacy Agreement')
+terms_of_service = st.Page("term_of_service.py",title="Terms of Service")
 
-pg = st.navigation([login,life_insurance,life_predictor,death_predictor,friends,settings])
+
+pg = st.navigation([login,life_insurance,life_predictor,death_predictor,friends,settings,privacy_agreement,terms_of_service])
 if 'interest_rate' not in st.session_state:
     st.session_state["interest_rate"]=1
 if 'people/prices/mu' not in st.session_state:

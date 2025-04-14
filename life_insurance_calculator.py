@@ -8,6 +8,7 @@ st.title("Neural Net Life Cost Predictor")
 # Main stuff
 # TODO: Replace text_input with number_input with sensible parameters (e.g., height should be positive)
 
+st.write(st.session_state['prev_user_inputs'])
 
 inputs=st_get_inputs(st.session_state['prev_user_inputs'])
 st.write(f"You entered: {inputs}")
@@ -28,6 +29,7 @@ elif policy_type in ['fl','fd']:
 
 if st.button("Click me"):
     if inputs!=st.session_state['prev_user_inputs']:
+        st.session_state['prev_user_inputs']=inputs
         #st.session_state['prev_user_inputs']=inputs
         try:
             st.write(update_user_data_item(st.experimental_user.email,1,inputs))
