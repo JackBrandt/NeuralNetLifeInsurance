@@ -218,7 +218,7 @@ def str_int_workaround(string):
 
 def st_get_inputs(previous_user_inputs):
     st.write("Please enter your personal info and risk factors below to get started")
-    st.write(previous_user_inputs)
+    #st.write(previous_user_inputs)
     dob = st.date_input("Date of birth",value=previous_user_inputs[0],format="MM/DD/YYYY")
     weight = st.text_input("Weight(lbs): ",value=previous_user_inputs[1])
     sex = st.pills("Sex:", ['m','f'],key='sex', selection_mode="single", format_func=sex_format, label_visibility="visible",default=previous_user_inputs[2])

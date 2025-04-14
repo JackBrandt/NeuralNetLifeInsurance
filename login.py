@@ -16,7 +16,7 @@ else:
     username = get_username(st.experimental_user.get('email'))
     #st.write(username)
     #st.write(st.experimental_user.get('email'))
-    if username is not None:
+    if username is not None and username != '':
         st.write(f'Hello {username}')
     else:
         st.write(f'Hello {st.experimental_user.get("email")}')

@@ -26,15 +26,11 @@ if policy_type=='v':
 elif policy_type in ['fl','fd']:
     payment_type=st.pills("Payment Type", ['Lump','Annual','Monthly','Compare Options'], selection_mode="single", label_visibility="visible")
 
-make_policy=st.checkbox('Check this box to specify you want to create a model policy, leave it unchecked to only calculate the expected cost')
-
 if st.button("Click me"):
     if inputs!=st.session_state['prev_user_inputs']:
-        st.session_state['prev_user_inputs']=inputs
+        #st.session_state['prev_user_inputs']=inputs
         try:
             st.write(update_user_data_item(st.experimental_user.email,1,inputs))
         except:
             pass
     st.write(actu_str(inputs[1:],fv,age,policy_type,duration,payment_type,st.session_state['interest_rate']))
-    if make_policy:
-        pass
