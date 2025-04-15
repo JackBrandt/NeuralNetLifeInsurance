@@ -87,7 +87,8 @@ def user_list_of_dicts():
                            'high score':user[2],
                            'subject':'',
                            'msg':'',
-                           'biggest change':['',0,0] # What was changed,change in life expectancy, change in cost
+                           'biggest change':['',0,0], # What was changed,change in life expectancy, change in cost
+                           'friends':user[4]
                             })
     return list_dicts
 
@@ -121,16 +122,17 @@ changeables = [['loose weight',-.05,1],#what it is, new value, index
     ['cholesterol',-20,18],
 ]
 
-def find_best_change(user,user_index):
-    if user['data']==['']:
-        users[user_index]['subject']='Please fill out your data'
-        users[user_index]['msg']='Please fill out your data'
-        return None
-    for value in user['data']:
+def is_user_data_invalid(data):
+    if data==['']:
+        return True
+    for value in data:
         if value is None:
-            users[user_index]['subject']='Please fill out your data'
-            users[user_index]['msg']='Please fill out your data'
-            return None
+            return True
+    return False
+
+def find_best_change(user,user_index):
+    if is_user_data_invalid(user['data']):
+        return None
     print(f'Find best change, user data: {user['data']}')
     cur_life_expec=get_yrs_left(user['data'],contains_name=False,model_print_statement=False)
     best_change=([None,None,None],0)
@@ -179,7 +181,7 @@ def change_specific_message_part(best_change):
         case _:
             return 'If you see this I fxcked up my case statements somewhere... '
 
-def get_msg(user,best_change):
+def get_msg(user,best_change,users):
     if best_change==None:
         msg='Hello, ' + user['email'] + '!\n\n'
         msg+='We here at Neural Net Life are always looking for ways to help you lower your insurance premiums and help increase your lifespance. '
@@ -192,8 +194,41 @@ def get_msg(user,best_change):
     msg+=f'We noticed you could increase your lifespan by {best_change[1]:.1f} years by '
     msg+=change_specific_message_part(best_change)
     msg+='We recommend you make these changes so that you can live longer. And that you update your personal info online so that we can save you money on your life insurance.'
-    msg+='\n\nHere\'s the link to the website: https://streamlit-app-628308967953.us-central1.run.app/ \nAnd, from all of us at Neural Net Life,\n thank you for being a member.'
+    msg+=get_highscore_msg(user,users)
+    msg+=get_friend_health_msg(user,users)
+    msg+='\n\nHere\'s the link to the website: https://streamlit-app-628308967953.us-central1.run.app/ \nAnd, from all of us at Neural Net Life,\nThank you for being a member.'
     return msg
+
+def get_highscore_msg(user,users):
+    # Write a msg based on who has the highest highscore
+    if user['high score'] is not None:
+        current_high_high_score=(user['high score'], user['email'])
+    else:
+        current_high_high_score=(0,'')
+    for other in users:
+        try:
+            if other['email'] in user['friends'] and other['high score']>current_high_high_score[0]:
+                current_high_high_score=(other['high score'],other['email'])
+        except TypeError:
+            print('Type error?')
+    if current_high_high_score[1]==user['email']:
+        return '\n\nGood news! Your high score is still better than your friends, but it might not be for long.\n'
+    if current_high_high_score[1]=='':
+        return '\n\nEither something is wrong with our system, or it looks like neither you nor your friends have set a high score in death predictor yet. What\'s up with that?'
+    return f'\n\nUh oh! Your friend {current_high_high_score[1]} has a better high score than you in death predictor! Show them who\'s boss and beat their high score of {current_high_high_score[0]}'
+
+def get_friend_health_msg(user,users):
+    if is_user_data_invalid(user['data']):
+        return ''
+    best_life_expectency=(get_yrs_left(user['data'],contains_name=False,model_print_statement=False),user['email'])
+    for other in users:
+        if is_user_data_invalid(other['data']):
+            continue
+        if other['email'] in user['friends'] and get_yrs_left(other['data'],contains_name=False,model_print_statement=False)>best_life_expectency[0]:
+            best_life_expectency=(get_yrs_left(other['data'],contains_name=False,model_print_statement=False),other['email'])
+    if best_life_expectency[1]==user['email']:
+        return '\nCongrats! Based on your health info, it looks like you\'ll live longer than your friends.\n'
+    return f'\nBummer! Looks like you\'ll die before your friend {best_life_expectency[1]}. They\'re predicted to live all the way to  the age of {best_life_expectency[0]:.1f}! Figure out to improve your health so that you can outlive them.'
 
 def whatif_analysis(users):
     for i,user in enumerate(users):
@@ -201,7 +236,7 @@ def whatif_analysis(users):
         users[i]['biggest change']=best_change
         print(f'Current user in whatif_analysis: {users[i]}')
         users[i]['subject']=get_subject(user,best_change)
-        users[i]['msg']=get_msg(user,best_change)
+        users[i]['msg']=get_msg(user,best_change,users)
     return users
 
 def email_user(user,email_password=None):
@@ -224,3 +259,7 @@ if __name__ == '__main__':
             print(user['msg'])
         email_users(users)
         time.sleep(day)
+
+# What I want to add:
+# Which of your friends has beat your highscore
+# Which of your friends has the highest life expectency
