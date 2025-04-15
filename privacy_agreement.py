@@ -49,6 +49,6 @@ For the Love of Absurdity: Think of it like a plot twist in your favorite gameâ€
 7. Contact Information\n\
 If you have any questions, concerns, or require a refresher on your waiver of all rights to sue, please get in touch with us at:\n\
 \n\
-superengineerdude@gmail.com\n\
+neuralnetlife@gmail.com\n\
 "
 st.write(privacy_policy)
