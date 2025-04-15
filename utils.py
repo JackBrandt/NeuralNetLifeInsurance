@@ -21,7 +21,7 @@ def prep_data(df, age,test=True,sigma=10):
 
     # Extract target (y) and features (X)
     empty=[0]*(int(96-(age-25)))
-    y_vals = df.iloc[:, 0].values  # First column is target
+    y_vals = df.iloc[:, 0].values  # Firspyt column is target
     y_vals=[value-age for value in y_vals]
     y=[empty.copy() for _ in y_vals]
     for i,y_val in enumerate(y_vals):
@@ -204,20 +204,25 @@ def get_loading_function(perm_key):
     return lambda : load_value(perm_key)
 
 def str_int_workaround(string):
+    if string is None: return None
     match string:
-        case "1.0":
+        case "1.0" |'1' | 1:
             return 1
-        case "2.0":
+        case "2.0" | '2' | 2:
             return 2
-        case "3.0":
+        case "3.0" | '3' | 3:
             return 3
         case _:
+            print(f'Unhandled case: {string}')
             raise Exception
 
 def st_get_inputs(previous_user_inputs):
     st.write("Please enter your personal info and risk factors below to get started")
-    st.write(previous_user_inputs)
-    dob = st.date_input("Date of birth",value=previous_user_inputs[0],format="MM/DD/YYYY")
+    #st.write(previous_user_inputs)
+    try:
+        dob = st.date_input("Date of birth",value=previous_user_inputs[0],format="MM/DD/YYYY")
+    except st.errors.StreamlitAPIException:
+        dob=st.date_input("Date of birth",format="MM/DD/YYYY")
     weight = st.text_input("Weight(lbs): ",value=previous_user_inputs[1])
     sex = st.pills("Sex:", ['m','f'],key='sex', selection_mode="single", format_func=sex_format, label_visibility="visible",default=previous_user_inputs[2])
     height = st.text_input("Height(in): ",value=previous_user_inputs[3])

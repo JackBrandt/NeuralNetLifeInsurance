@@ -9,7 +9,30 @@ def get_email_password():
     response = client.access_secret_version(name='projects/snappy-rainfall-454116-t5/secrets/email_password/versions/latest')
     return response.payload.data.decode('UTF-8')
 
-def send_email(address, subject, msg, password=None):
+def send_email(address, subject, msg):
+    '''
+    Sends an email to a specified address with a given subject and message. This function uses Gmail's SMTP server to send the email, leveraging SSL for a secure connection.
+
+    Parameters:
+        address (str): The email address of the recipient.
+        subject (str): The subject line of the email.
+        msg (str): The body content of the email.
+
+    Returns:
+        None: This function does not return any value.
+
+    Side Effects:
+        - Asks the user to input the email app password during execution.
+        - Sends an email using the provided credentials and inputs.
+
+    Usage:
+        >>> send_email('example@example.com', 'Greetings', 'Hello, this is a test email from NeuralNetLife!')
+
+    Note:
+        - It's important to ensure that 'Less secure app access' is enabled in your Gmail account settings or use an app password if 2FA is enabled.
+        - The function assumes the sender's email is hardcoded as 'neuralnetlife@gmail.com'. Adjust this accordingly.
+        - The password input step will pause the execution and wait for user input, which might not be suitable for automated scripts without modification.
+    '''
     email = EmailMessage()
     email.set_content(msg)
     me='neuralnetlife@gmail.com'
