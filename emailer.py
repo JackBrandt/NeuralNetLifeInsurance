@@ -9,7 +9,7 @@ def get_email_password():
     response = client.access_secret_version(name='projects/snappy-rainfall-454116-t5/secrets/email_password/versions/latest')
     return response.payload.data.decode('UTF-8')
 
-def send_email(address, subject, msg):
+def send_email(address, subject, msg, password=None):
     '''
     Sends an email to a specified address with a given subject and message. This function uses Gmail's SMTP server to send the email, leveraging SSL for a secure connection.
 
@@ -49,7 +49,7 @@ def send_email(address, subject, msg):
     with smtplib.SMTP_SSL(smtp_server, port) as s:
         # Login with app password
         if password is None:
-            password = input("Enter your email APP password: ")
+            password = get_email_password()
         s.login(me, password)
 
         # Send the message

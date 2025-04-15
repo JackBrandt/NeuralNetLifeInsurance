@@ -41,11 +41,6 @@ def str_to_date(date_str):
     year, month, day = map(int, match.groups())
     return datetime.date(year, month, day)
 
-# Example usage:
-date_string = "datetime.date(2003, 9, 15)"
-converted_date = str_to_date(date_string)
-print(converted_date)  # Output: 2003-09-15
-
 def unwrap_string(string):
     return string[string.index("'")+1:string.index("'",string.index("'")+1)]
 
@@ -59,18 +54,13 @@ def string_to_list(string,convert_to_age=True):
             string[i] = float(string[i])
         except:
             pass
-    #print(string) # debug statement
     if convert_to_age:
         try:
             string=[2025-int(string[0][14:18])]+string[3:]
         except:
             pass
-            # Unwrap each string
     else:
-        #print('Made it to 1')
-        #print(string)
         string=[str_to_date(string[0]+', '+str(int(string[1]))+', '+string[2])]+string[3:]
-        #print('Made it to 2')
     for i in range(len(string)):
         try:
             string[i]=unwrap_string(string[i])
@@ -92,8 +82,6 @@ def user_list_of_dicts():
         if len(user)<3:     #WARNING THIS DOESN'T CHECK WHAT IS MISSING AND JUST ASSUMES ITS HIGH SCORE, THIS IS A TE
             user.append(0)
         user[1]=string_to_list(user[1])
-        #print(user[1]) # debug statement
-        #print(user[1]) # debug statement
         list_dicts.append({'email':user[0],
                            'data':user[1],# ISSUE, IT DOESN"T STORE AGE...
                            'high score':user[2],
@@ -105,15 +93,15 @@ def user_list_of_dicts():
 
 def test_change(cur_life_expec,data,change):
     data_copy=data.copy()
-    print(data_copy)
+    print(f'Current data copy: {data_copy}')
     match change[1]:
         case 'n':
             data_copy[change[2]]='n'
         case _ if change[1]<-1:
             data_copy[change[2]]=data_copy[change[2]]+change[1]
         case _:
-            print(change[1])
-            print(data_copy[change[2]])
+            print(f'Current change: {change[1]}')
+            print(f'Data after change: {data_copy[change[2]]}')
             data_copy[change[2]]=data_copy[change[2]]-change[1]*data_copy[change[2]]
     return get_yrs_left(data_copy,contains_name=False,model_print_statement=False)-cur_life_expec
 
@@ -136,10 +124,14 @@ changeables = [['loose weight',-.05,1],#what it is, new value, index
 def find_best_change(user,user_index):
     if user['data']==['']:
         users[user_index]['subject']='Please fill out your data'
-        users[user_index]['msg']='This is a test... Please fill out your data'
+        users[user_index]['msg']='Please fill out your data'
         return None
-    # Else
-    print(user['data'])
+    for value in user['data']:
+        if value is None:
+            users[user_index]['subject']='Please fill out your data'
+            users[user_index]['msg']='Please fill out your data'
+            return None
+    print(f'Find best change, user data: {user['data']}')
     cur_life_expec=get_yrs_left(user['data'],contains_name=False,model_print_statement=False)
     best_change=([None,None,None],0)
     for change in changeables:
@@ -151,7 +143,7 @@ def find_best_change(user,user_index):
 
 def get_subject(user,best_change):
     if best_change==None:
-        return 'This is a test'
+        return 'Your insurance information is incomplete'
     return 'Wondering how to lower your insurance premiums?'
 
 def change_specific_message_part(best_change):
@@ -189,20 +181,25 @@ def change_specific_message_part(best_change):
 
 def get_msg(user,best_change):
     if best_change==None:
-        return 'This is a test'
+        msg='Hello, ' + user['email'] + '!\n\n'
+        msg+='We here at Neural Net Life are always looking for ways to help you lower your insurance premiums and help increase your lifespance. '
+        msg+=f'But we can\'t do that if you don\'t fill out all your information. '
+        msg+='Please finish filling out that info today.'
+        msg+='\n\nHere\'s the link to the website: https://streamlit-app-628308967953.us-central1.run.app/ \nAnd, from all of us at Neural Net Life,\n thank you for being a member.'
+        return msg
     msg='Hello, ' + user['email'] + '!\n\n'
     msg+='We here at Neural Net Life are always looking for ways to help you lower your insurance premiums and help increase your lifespance. '
     msg+=f'We noticed you could increase your lifespan by {best_change[1]:.1f} years by '
     msg+=change_specific_message_part(best_change)
     msg+='We recommend you make these changes so that you can live longer. And that you update your personal info online so that we can save you money on your life insurance.'
-    msg+='\n\nHere\'s the link to the website: ...\nAnd, from all of us at Neural Net Life,\n thank you for being a member.'
+    msg+='\n\nHere\'s the link to the website: https://streamlit-app-628308967953.us-central1.run.app/ \nAnd, from all of us at Neural Net Life,\n thank you for being a member.'
     return msg
 
 def whatif_analysis(users):
     for i,user in enumerate(users):
         best_change=find_best_change(user,i)
         users[i]['biggest change']=best_change
-        print(users[i])
+        print(f'Current user in whatif_analysis: {users[i]}')
         users[i]['subject']=get_subject(user,best_change)
         users[i]['msg']=get_msg(user,best_change)
     return users
@@ -210,7 +207,7 @@ def whatif_analysis(users):
 def email_user(user,email_password=None):
     if email_password is None:
         email_password=get_email_password()
-    send_email(user['email'],user['subject'],user['msg'],email_password)
+    send_email(user['email'],user['subject'],user['msg'])
 
 def email_users(users):
     email_password=get_email_password()
