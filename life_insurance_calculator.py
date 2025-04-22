@@ -8,10 +8,10 @@ st.title("Neural Net Life Cost Predictor")
 # Main stuff
 # TODO: Replace text_input with number_input with sensible parameters (e.g., height should be positive)
 
-st.write(st.session_state['prev_user_inputs'])
+#st.write(st.session_state['prev_user_inputs'])
 
 inputs=st_get_inputs(st.session_state['prev_user_inputs'])
-st.write(f"You entered: {inputs}")
+#st.write(f"You entered: {inputs}")
 
 # Interactive Components
 st.write('After you enter your personal information, enter payment type then click the button to calculate your expected insurance cost')

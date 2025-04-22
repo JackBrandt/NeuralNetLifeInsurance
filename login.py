@@ -29,6 +29,6 @@ else:
 
 try:
     load_user_data(st.experimental_user.get('email'))
-    st.write('Cloud storage access validated')
+    #st.write('Cloud storage access validated')
 except:
     st.write('Cloud storage access failed...')
