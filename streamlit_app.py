@@ -1,7 +1,14 @@
 import streamlit as st
 from neural_net import NeuralNet
-from cloud_storage import load_user_data, get_all_users,get_friends
+from cloud_storage import load_user_data, get_all_users,get_friends, get_friend_requests
 import json
+from google.cloud import storage
+import google.auth
+import os
+from auto_emailer import string_to_list
+
+#credentials, project = google.auth.default()
+#st.write("Credentials:", credentials)
 
 login = st.Page("login.py",title='Neural Net Life Login Page', icon='🏠')
 life_insurance = st.Page("life_insurance_calculator.py", title="Neural Net Life Cost Predictor", icon='🧮')
@@ -9,8 +16,11 @@ life_predictor = st.Page('life_predictor.py',title='Life Predictor', icon='🧮'
 death_predictor = st.Page("death_predictor.py",title="Death Predictor Game",icon='🎮')
 settings = st.Page("settings.py",title="Settings",icon='⚙️')
 friends = st.Page("friends.py",title='Friends',icon='😎')
+privacy_agreement = st.Page("privacy_agreement.py",title='User Privacy Agreement')
+terms_of_service = st.Page("term_of_service.py",title="Terms of Service")
 
-pg = st.navigation([login,life_insurance,life_predictor,death_predictor,friends,settings])
+
+pg = st.navigation([login,life_insurance,life_predictor,death_predictor,friends,settings,privacy_agreement,terms_of_service])
 if 'interest_rate' not in st.session_state:
     st.session_state["interest_rate"]=1
 if 'people/prices/mu' not in st.session_state:
@@ -24,14 +34,16 @@ if 'check_options' not in st.session_state:
 if 'prev_user_inputs' not in st.session_state or 'high_score' not in st.session_state:
     try:
         user_data=load_user_data(st.experimental_user.get('email'))
+        print(user_data)
         try:
             st.session_state['prev_user_inputs']=user_data[1]
         except:
+            print("Error with loading user data at startup 1")
             st.session_state['prev_user_inputs']=[None,None,None,None,None,None,None,None,
                                                 None,None,None,None,None,None,None,None,
-                                                None,None,None,None,None,None,None]
+                                                None,None,None,None,None,None,None,None]
         try:
-            st.session_state['high_score']=user_data[2]
+            st.session_state['high_score']=float(user_data[2])
         except:
             st.session_state['high_score']=0
     except:
@@ -41,9 +53,16 @@ if 'prev_user_inputs' not in st.session_state or 'high_score' not in st.session_
                                                 None,None,None,None,None,None,None]
         st.session_state['high_score']=0
 if 'current_friends' not in st.session_state:
-    st.session_state.current_friends = get_friends(st.experimental_user.get('email'))
+    try:
+        st.session_state.current_friends = get_friends(st.experimental_user.get('email'))
+    except TypeError:
+        st.session_state.current_friends = None
+if 'friend_requests' not in st.session_state:
+    try:
+        st.session_state.friend_requests = get_friend_requests(st.experimental_user.get('email'))
+    except TypeError:
+        st.session_state.friend_requests = None
 if 'potential_friends' not in st.session_state:
     st.session_state.potential_friends = get_all_users()
-
 
 pg.run()

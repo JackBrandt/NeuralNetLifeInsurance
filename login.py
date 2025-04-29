@@ -14,15 +14,21 @@ if st.experimental_user.get('email') is None:
         st.login()
 else:
     username = get_username(st.experimental_user.get('email'))
-    if username is not None:
+    #st.write(username)
+    #st.write(st.experimental_user.get('email'))
+    if username is not None and username != '':
         st.write(f'Hello {username}')
     else:
         st.write(f'Hello {st.experimental_user.get("email")}')
         new_username = st.text_input('Create an username')
         if st.button("Set username"):
             set_username(st.experimental_user.get('email'),new_username)
+            st.rerun()
     if st.button("Log out"):
         st.logout()
 
-
-
+try:
+    load_user_data(st.experimental_user.get('email'))
+    #st.write('Cloud storage access validated')
+except:
+    st.write('Cloud storage access failed...')

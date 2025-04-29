@@ -6,6 +6,7 @@ from actu import life_liability_pv_mu,get_mort_tab,\
 from neural_net import NeuralNet
 from faker import Faker
 from utils import sex_format,risk_num_format
+from cloud_storage import update_user_data_item
 file_path='data.csv'
 
 def np_to_int(mixed_array):
@@ -50,15 +51,16 @@ def price_person(person,I):
     mort_tab=get_mort_tab(age,inputs)
     return life_liability_pv_mu(fv,I,mort_tab,0)
 
-def get_yrs_left(person):
-    person=person[1:]
+def get_yrs_left(person,contains_name=True,model_print_statement=True):
+    if contains_name:
+        person=person[1:]
     age=person[0]
     if age<25:
         def_yrs=25-age
     else:
         def_yrs=0
     inputs=person[1:]
-    mort_tab=get_mort_tab(age,inputs,50)
+    mort_tab=get_mort_tab(age,inputs,50,model_print_statement=model_print_statement)
     return years_left_mu(mort_tab,def_yrs)
 
 def get_mus(people):
@@ -126,18 +128,29 @@ def print_people(people):
             print_person(people[i])
 
 def dp_print_header():
+    high_score=st.session_state['high_score']
     score=st.session_state['score']
     st.title('Death Predictor Game')
     st.subheader('Who (statistically) has the longest left to live?')
     st.markdown('Guess correctly to gain points, guess wrongly to lose points')
+    st.subheader(f'*High Score:\t{round(high_score)}*')
     st.subheader(f'*Current Score:\t{round(score)}*')
-    return score
+    return high_score,score
 
 def update_score(mus,amount,age):
     st.session_state['guessed']=True
     score = st.session_state['score']
     if age==max(mus):
         st.session_state['score']=score+amount
+        #print(f'Current score {st.session_state['score']}')
+        #print(f'Current highscore: {st.session_state['high_score']}')
+        if st.session_state['score']>st.session_state['high_score']:
+            #print('Previous High score')
+            st.session_state['high_score']=st.session_state['score']
+            try:
+                update_user_data_item(st.experimental_user.email, 2, st.session_state['high_score'])
+            except AttributeError:
+                pass
     else:
         st.session_state['score']=score-amount
 
@@ -188,6 +201,8 @@ def guess_button(person_index,update_function,people,mus,prices):
     if st.button(people[person_index][0],key=f'person{person_index}',on_click=update_function,disabled=st.session_state['guessed']):
         if mus[person_index] is max(mus):
             st.subheader('Correct!')
+            if st.session_state['score']==st.session_state['high_score']:
+                st.subheader('New highscore!')
             mu_comparison(mus)
             st.text(f'Plus {round(prices[person_index])} points')
         else:

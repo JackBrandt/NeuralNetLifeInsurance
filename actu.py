@@ -3,10 +3,10 @@ from utils import policy_type_format
 
 def get_mort_tab(age,inputs,smooth=100):
     '''
-    Retrieves mortality table data for a specified age 
-    using a trained model. 
-    If the age is less than 25, the function adjusts to use the model for 
-    age 25. It loads the appropriate model, retrieves life 
+    Retrieves mortality table data for a specified age
+    using a trained model.
+    If the age is less than 25, the function adjusts to use the model for
+    age 25. It loads the appropriate model, retrieves life
     data with optional smoothing, and returns it as a numpy array.
 
     Parameters:
@@ -15,23 +15,23 @@ def get_mort_tab(age,inputs,smooth=100):
         inputs (list): A list of inputs required by the model
         to generate predictions. These inputs must match
         the model's expected input format.
-        smooth (int, optional): The percentage of the output 
+        smooth (int, optional): The percentage of the output
         to apply Gaussian smoothing. Defaults to 100 for
         fully smoothed outputs.
 
     Returns:
-        numpy.ndarray: A numpy array of the mortality 
+        numpy.ndarray: A numpy array of the mortality
         table data derived from the model's predictions.
 
     Usage:
         >>> age = 30
-        >>> inputs = [180, 'm', 72, 130, 'n', 'n', 3, 1, 1, 
+        >>> inputs = [180, 'm', 72, 130, 'n', 'n', 3, 1, 1,
         'n', 'n', 'n', 4, 'n', 0, 'n', 'n', 200, 'n', 'n', 'n', 'n', 'n']
         >>> mortality_table = get_mort_tab(age, inputs)
         >>> print(mortality_table)
 
     Note:
-        - The function ensures that the model used for predictions 
+        - The function ensures that the model used for predictions
         is at least for age 25, reflecting minimum policy age limits.
         - The `sigma` value for Gaussian smoothing is set to
           7.5, which influences the smoothness of the output.
@@ -47,7 +47,7 @@ def get_mort_tab(age,inputs,smooth=100):
     return mort_tab
 
 def payout_pv(fv, n, i):
-    '''Calculates the present value of a payment 
+    '''Calculates the present value of a payment
     in n years at a given interest rate
     Args:
         fv: The final payment amount
@@ -89,16 +89,16 @@ def annuity_pv(n,i,pmt):
 
 def simple_annuity_fv(n,i,pmt):
     '''
-    Calculates the future value of a simple annuity given the number 
-    of periods, the interest rate, and the periodic payment. 
+    Calculates the future value of a simple annuity given the number
+    of periods, the interest rate, and the periodic payment.
     The function first computes the present value of a unit
       annuity using another function `annuity_pv`, then scales
-        this by the periodic payment and compounds it to the end 
+        this by the periodic payment and compounds it to the end
         of the period specified.
 
     Parameters:
         n (int): The number of periods over which the annuity is paid.
-        i (float): The interest rate per period, expressed 
+        i (float): The interest rate per period, expressed
         as a percentage. For example, 5 for 5%.
         pmt (float): The amount of each periodic payment.
 
@@ -108,15 +108,15 @@ def simple_annuity_fv(n,i,pmt):
     Usage:
         >>> future_value = simple_annuity_fv(10, 5, 100)
         >>> print(future_value)
-        # This will print the future value of an annuity where 
+        # This will print the future value of an annuity where
         # $100 is paid each period for 10 periods at an interest rate of 5%.
 
     Note:
-        - The interest rate `i` is expected as a percentage 
+        - The interest rate `i` is expected as a percentage
         and is converted within the function to a decimal by dividing by 100.
-        - This function depends on `annuity_pv`, 
-        which must be defined elsewhere in your codebase. 
-        This function calculates the present value of an annuity 
+        - This function depends on `annuity_pv`,
+        which must be defined elsewhere in your codebase.
+        This function calculates the present value of an annuity
         of $1 per period for `n` periods at a given interest rate.
     '''
     pv=annuity_pv(n,i,1)
@@ -185,28 +185,28 @@ def life_pmt_mu(fv,i,mort_tab,defer_yrs=0):
 def duration_liability_mu(fv,i,mort_tab,defer_yrs,duration):
     '''
     Calculates the modified present value of a liability
-    that is expected to be paid over a specified duration, 
+    that is expected to be paid over a specified duration,
     taking into account mortality rates and the time value of
-    money. The liability's payments are adjusted by the 
-    probability of survival from a mortality table and are 
+    money. The liability's payments are adjusted by the
+    probability of survival from a mortality table and are
     deferred by a certain number of years.
 
     Parameters:
-        fv (float): The future value or the payment 
+        fv (float): The future value or the payment
         amount of the liability at each period.
-        i (float): The annual discount rate as a decimal. 
+        i (float): The annual discount rate as a decimal.
         For example, 0.05 for 5%.
-        mort_tab (numpy.ndarray): A table of mortality 
-        probabilities corresponding to each year of life. 
-        This table is used to adjust the cash flows 
+        mort_tab (numpy.ndarray): A table of mortality
+        probabilities corresponding to each year of life.
+        This table is used to adjust the cash flows
         based on the likelihood of survival to each payment period.
-        defer_yrs (int): The number of years before the 
+        defer_yrs (int): The number of years before the
         liability payments begin.
-        duration (int): The total number of years from the 
+        duration (int): The total number of years from the
         beginning of the period to the end of the liability payments.
 
     Returns:
-        float: The present value of the liability, 
+        float: The present value of the liability,
         adjusted for mortality and the time value of money.
 
     Usage:
@@ -220,12 +220,12 @@ def duration_liability_mu(fv,i,mort_tab,defer_yrs,duration):
         # Outputs the present value of the liability considering the given parameters.
 
     Note:
-        - It is crucial that the `mort_tab` array is at least 
+        - It is crucial that the `mort_tab` array is at least
         as long as the `duration` minus `defer_yrs`. If it is not, the function will encounter an index out of range error.
         - This function assumes that `life_liability_pv_mu`,
-        a function to calculate the present value of 
-        life contingent liabilities, is defined elsewhere 
-        in your codebase and is used here to perform the 
+        a function to calculate the present value of
+        life contingent liabilities, is defined elsewhere
+        in your codebase and is used here to perform the
         actual present value calculation.
     '''
     mort_tab=mort_tab[:int(duration-defer_yrs)]
@@ -233,24 +233,24 @@ def duration_liability_mu(fv,i,mort_tab,defer_yrs,duration):
 
 def duration_pmt_mu(fv,i,mort_tab,defer_yrs,duration):
     '''
-    Calculates the periodic payment that needs to 
+    Calculates the periodic payment that needs to
     be made to match the present value of a future liability,
-    adjusted for mortality, over a specified duration and 
-    deferment period. The function computes the present value of 
-    the liability first and then determines the equivalent 
+    adjusted for mortality, over a specified duration and
+    deferment period. The function computes the present value of
+    the liability first and then determines the equivalent
     annuity payment that matches this present value using
     mortality-adjusted annuity factors.
 
     Parameters:
-        fv (float): The future value or the payment amount of 
+        fv (float): The future value or the payment amount of
         each liability payment.
         i (float): The discount rate per period as a decimal.
         For example, 0.05 for 5%.
-        mort_tab (numpy.ndarray): A table of mortality 
-        probabilities corresponding to each year of life. 
-        This table is used to adjust the annuity payments 
+        mort_tab (numpy.ndarray): A table of mortality
+        probabilities corresponding to each year of life.
+        This table is used to adjust the annuity payments
         based on the probability of survival to each payment period.
-        defer_yrs (int): The number of years before 
+        defer_yrs (int): The number of years before
         the annuity payments begin.
         duration (int): The total number of years from
         the beginning of the period to the end of the annuity payments.
